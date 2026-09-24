@@ -1,0 +1,104 @@
+[
+  {
+    "id": "nghe-an-2026",
+    "slug": "nghe-an-2026",
+    "code": "NA26",
+    "name": "VnExpress Marathon Grand Tour Nghe An 2026",
+    "shortName": "Grand Tour Nghe An 2026",
+    "city": "TP. Vinh",
+    "province": "Nghệ An",
+    "locationFull": "TP. Vinh, Nghệ An",
+    "date": "13/09/2026",
+    "officialUrl": "https://vm.vnexpress.net/nghe-an-2026",
+    "defaultLogoUrl": "/race_logo.png",
+    "defaultBgUrl": "/NA26.png",
+    "accentColor": "#0369a1",
+    "themeBadgeBg": "bg-sky-50 text-sky-700 border-sky-200/80",
+    "themeDotBg": "bg-sky-600",
+    "storageKeyPrefix": "vm_nghean",
+    "appsScriptUrl": "https://script.google.com/macros/s/AKfycbwvqwP__bXjxWG8WgH_Qjy8ypBztY8P2bAaQDdLvVckyA-KQtoJ7Hyzk8E-6WpTlrR1/exec?key=ducbm900966559155",
+    "description": "Tra cứu kết quả & Chứng nhận điện tử VnExpress Marathon Grand Tour Nghe An 2026",
+    "placements": {
+      "name": {
+        "id": "name",
+        "label": "Tên Vận Động Viên",
+        "x": 50.0,
+        "y": 33.1,
+        "fontSize": 63,
+        "color": "#054b53",
+        "align": "center",
+        "fontWeight": 800
+      },
+      "distance": {
+        "id": "distance",
+        "label": "Cự ly (VD: 21K, 42K)",
+        "x": 36.5,
+        "y": 36.63,
+        "fontSize": 50,
+        "color": "#054b53",
+        "align": "center",
+        "fontWeight": 700
+      },
+      "bib": {
+        "id": "bib",
+        "label": "Số BIB (VD: 90110)",
+        "x": 72.5,
+        "y": 36.63,
+        "fontSize": 50,
+        "color": "#054b53",
+        "align": "center",
+        "fontWeight": 700
+      },
+      "chipTime": {
+        "id": "chipTime",
+        "label": "Thời gian Chip Time",
+        "x": 50.0,
+        "y": 49.2,
+        "fontSize": 220,
+        "color": "#fff100",
+        "align": "center",
+        "fontWeight": 700
+      },
+      "finishTime": {
+        "id": "finishTime",
+        "label": "Finish Time (Gun Time)",
+        "x": 31.5,
+        "y": 54.5,
+        "fontSize": 55,
+        "color": "#FFF100",
+        "align": "left",
+        "fontWeight": 700
+      },
+      "overallRank": {
+        "id": "overallRank",
+        "label": "Hạng Chung cuộc (Overall)",
+        "x": 28.5,
+        "y": 58.1,
+        "fontSize": 55,
+        "color": "#FFF100",
+        "align": "left",
+        "fontWeight": 700
+      },
+      "genderRank": {
+        "id": "genderRank",
+        "label": "Hạng Giới tính (Gender)",
+        "x": 79.5,
+        "y": 58.1,
+        "fontSize": 55,
+        "color": "#FFF100",
+        "align": "left",
+        "fontWeight": 600
+      },
+      "ageGroupRank": {
+        "id": "ageGroupRank",
+        "label": "Hạng Lứa tuổi (Age Group)",
+        "x": 49.0,
+        "y": 61.6,
+        "fontSize": 55,
+        "color": "#FFF100",
+        "align": "left",
+        "fontWeight": 600
+      }
+    }
+  }
+]
