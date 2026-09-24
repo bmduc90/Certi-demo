@@ -282,25 +282,25 @@ export const AdminPlacementStudio: React.FC<AdminPlacementStudioProps> = ({
   // PASSWORD LOCK SCREEN
   if (!isAuthenticated) {
     return (
-      <div className="min-h-screen bg-stone-900 flex items-center justify-center p-4">
-        <div className="bg-stone-850 border border-stone-700 rounded-3xl p-6 sm:p-8 max-w-md w-full shadow-2xl text-stone-100">
+      <div className="min-h-screen bg-slate-950 flex items-center justify-center p-4">
+        <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 sm:p-8 max-w-md w-full shadow-2xl text-slate-100">
           <div className="flex flex-col items-center text-center mb-6">
-            <div className="w-14 h-14 rounded-2xl bg-teal-500/20 border border-teal-400/30 flex items-center justify-center text-teal-400 mb-4 shadow-inner">
+            <div className="w-14 h-14 rounded-2xl bg-[#9F224E]/20 border border-[#9F224E]/40 flex items-center justify-center text-[#FFD100] mb-4 shadow-inner">
               <ShieldCheck className="w-8 h-8" />
             </div>
             <h1 className="text-xl font-bold text-white mb-1">Khu Vực Quản Trị Hệ Thống</h1>
-            <p className="text-stone-400 text-xs">
+            <p className="text-slate-400 text-xs">
               Tạo giải đấu, thiết lập URL, phôi chứng nhận, link Google Apps Script và xuất file Excel cấu hình.
             </p>
           </div>
 
           <form onSubmit={handleLogin} className="space-y-4">
             <div>
-              <label className="block text-xs font-semibold text-stone-300 mb-1.5">
+              <label className="block text-xs font-semibold text-slate-300 mb-1.5">
                 Mật khẩu Admin
               </label>
               <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-stone-500">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-500">
                   <Lock className="w-4 h-4" />
                 </div>
                 <input
@@ -309,12 +309,12 @@ export const AdminPlacementStudio: React.FC<AdminPlacementStudioProps> = ({
                   onChange={(e) => setPasswordInput(e.target.value)}
                   placeholder="Nhập mật khẩu..."
                   autoFocus
-                  className="w-full pl-9 pr-10 py-2.5 bg-stone-800 border border-stone-700 focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20 rounded-xl text-sm text-white placeholder-stone-500 transition-all outline-none"
+                  className="w-full pl-9 pr-10 py-2.5 bg-slate-800 border border-slate-700 focus:border-[#9F224E] focus:ring-2 focus:ring-[#9F224E]/20 rounded-xl text-sm text-white placeholder-slate-500 transition-all outline-none"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword((p) => !p)}
-                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-stone-400 hover:text-stone-200 transition-colors cursor-pointer"
+                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-200 transition-colors cursor-pointer"
                 >
                   {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>
@@ -330,17 +330,17 @@ export const AdminPlacementStudio: React.FC<AdminPlacementStudioProps> = ({
 
             <button
               type="submit"
-              className="w-full py-2.5 px-4 bg-teal-600 hover:bg-teal-500 text-white font-bold rounded-xl text-sm transition-all shadow-lg shadow-teal-900/30 cursor-pointer"
+              className="w-full py-2.5 px-4 bg-gradient-to-r from-[#9F224E] to-[#BD1E51] hover:from-[#881337] hover:to-[#9F224E] text-white font-bold rounded-xl text-sm transition-all shadow-lg shadow-rose-950/40 cursor-pointer"
             >
               Đăng Nhập Quản Trị
             </button>
           </form>
 
-          <div className="mt-6 pt-4 border-t border-stone-800 flex justify-center">
+          <div className="mt-6 pt-4 border-t border-slate-800 flex justify-center">
             <button
               type="button"
               onClick={onBackToUserView}
-              className="text-stone-400 hover:text-stone-200 text-xs flex items-center gap-1.5 transition-colors cursor-pointer"
+              className="text-slate-400 hover:text-slate-200 text-xs flex items-center gap-1.5 transition-colors cursor-pointer"
             >
               <ArrowLeft className="w-3.5 h-3.5" />
               <span>Quay về trang tra cứu kết quả</span>
@@ -353,36 +353,36 @@ export const AdminPlacementStudio: React.FC<AdminPlacementStudioProps> = ({
 
   // AUTHENTICATED ADMIN STUDIO
   return (
-    <div className="min-h-screen bg-stone-900 text-stone-100 flex flex-col">
+    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col">
       {/* Top Studio Navigation Bar */}
-      <header className="sticky top-0 z-30 bg-stone-950/95 backdrop-blur-md border-b border-stone-800 px-4 py-2.5 flex items-center justify-between gap-3 flex-wrap">
+      <header className="sticky top-0 z-30 bg-slate-900/95 backdrop-blur-md border-b border-slate-800 px-4 py-2.5 flex items-center justify-between gap-3 flex-wrap">
         <div className="flex items-center gap-3">
           <button
             type="button"
             onClick={onBackToUserView}
-            className="p-1.5 rounded-lg bg-stone-800 hover:bg-stone-700 text-stone-300 hover:text-white transition-colors cursor-pointer flex items-center gap-1.5 text-xs font-medium"
+            className="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white transition-colors cursor-pointer flex items-center gap-1.5 text-xs font-medium"
             title="Quay về trang người dùng"
           >
             <ArrowLeft className="w-4 h-4" />
             <span className="hidden sm:inline">Về trang tra cứu</span>
           </button>
 
-          <div className="h-4 w-px bg-stone-700 hidden sm:block" />
+          <div className="h-4 w-px bg-slate-700 hidden sm:block" />
 
           {/* Tab Switcher: Quản lý giải vs Chỉnh toạ độ */}
-          <div className="flex items-center bg-stone-850 p-1 rounded-xl border border-stone-750">
+          <div className="flex items-center bg-slate-800 p-1 rounded-xl border border-slate-700">
             <button
               type="button"
               onClick={() => setAdminTab('races')}
               className={`px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer ${
                 adminTab === 'races'
-                  ? 'bg-teal-600 text-white shadow-xs'
-                  : 'text-stone-400 hover:text-stone-200'
+                  ? 'bg-gradient-to-r from-[#9F224E] to-[#B81B4B] text-white shadow-xs'
+                  : 'text-slate-400 hover:text-slate-200'
               }`}
             >
               <Trophy className="w-3.5 h-3.5" />
               <span>1. Quản Lý & Tạo Giải</span>
-              <span className="px-1.5 py-0.2 rounded-full bg-teal-950 text-[10px] font-mono">
+              <span className="px-1.5 py-0.2 rounded-full bg-slate-900 text-[10px] font-mono text-amber-300">
                 {allRaces.length}
               </span>
             </button>
@@ -392,8 +392,8 @@ export const AdminPlacementStudio: React.FC<AdminPlacementStudioProps> = ({
               onClick={() => setAdminTab('placements')}
               className={`px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer ${
                 adminTab === 'placements'
-                  ? 'bg-teal-600 text-white shadow-xs'
-                  : 'text-stone-400 hover:text-stone-200'
+                  ? 'bg-gradient-to-r from-[#9F224E] to-[#B81B4B] text-white shadow-xs'
+                  : 'text-slate-400 hover:text-slate-200'
               }`}
             >
               <Sliders className="w-3.5 h-3.5" />
@@ -405,18 +405,18 @@ export const AdminPlacementStudio: React.FC<AdminPlacementStudioProps> = ({
         {/* Center / Right controls */}
         <div className="flex items-center gap-2 flex-wrap">
           {/* Race Switcher Dropdown */}
-          <div className="flex items-center gap-1.5 bg-stone-850 border border-stone-700/80 rounded-xl px-2.5 py-1 text-xs">
-            <span className="text-stone-400 text-[11px] hidden md:inline">Giải đang chọn:</span>
+          <div className="flex items-center gap-1.5 bg-slate-800 border border-slate-700 rounded-xl px-2.5 py-1 text-xs">
+            <span className="text-slate-400 text-[11px] hidden md:inline">Giải đang chọn:</span>
             <select
               value={activeRace.id}
               onChange={(e) => {
                 const found = allRaces.find((r) => r.id === e.target.value);
                 if (found) onSelectRace(found);
               }}
-              className="bg-transparent text-teal-300 font-bold focus:outline-none cursor-pointer text-xs"
+              className="bg-transparent text-[#FFD100] font-bold focus:outline-none cursor-pointer text-xs"
             >
               {allRaces.map((r) => (
-                <option key={r.id} value={r.id} className="bg-stone-850 text-white">
+                <option key={r.id} value={r.id} className="bg-slate-900 text-white">
                   {r.name} ({r.code})
                 </option>
               ))}
@@ -436,18 +436,18 @@ export const AdminPlacementStudio: React.FC<AdminPlacementStudioProps> = ({
 
           {/* Runner Switcher (only when in placements tab) */}
           {adminTab === 'placements' && (
-            <div className="hidden lg:flex items-center gap-1.5 bg-stone-850 border border-stone-700/80 rounded-xl px-2.5 py-1 text-xs">
-              <Users className="w-3.5 h-3.5 text-teal-400 shrink-0" />
+            <div className="hidden lg:flex items-center gap-1.5 bg-slate-800 border border-slate-700 rounded-xl px-2.5 py-1 text-xs">
+              <Users className="w-3.5 h-3.5 text-sky-400 shrink-0" />
               <select
                 value={selectedRunner.bib}
                 onChange={(e) => {
                   const found = runners.find((r) => r.bib === e.target.value);
                   if (found) setSelectedRunner(found);
                 }}
-                className="bg-transparent text-stone-200 font-semibold focus:outline-none cursor-pointer text-xs"
+                className="bg-transparent text-slate-200 font-semibold focus:outline-none cursor-pointer text-xs"
               >
                 {runners.slice(0, 15).map((r) => (
-                  <option key={r.bib} value={r.bib} className="bg-stone-800 text-stone-100">
+                  <option key={r.bib} value={r.bib} className="bg-slate-900 text-slate-100">
                     {r.bib} - {r.name}
                   </option>
                 ))}
@@ -462,7 +462,7 @@ export const AdminPlacementStudio: React.FC<AdminPlacementStudioProps> = ({
               id="admin-save-code-btn"
               onClick={handleSaveToHardcoded}
               disabled={isSaving}
-              className="px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white text-xs font-bold flex items-center gap-1.5 shadow-md shadow-emerald-950/40 active:scale-95 transition-all cursor-pointer disabled:opacity-50"
+              className="px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-[#9F224E] to-[#B81B4B] hover:from-[#881337] hover:to-[#9F224E] text-white text-xs font-bold flex items-center gap-1.5 shadow-md shadow-rose-950/40 active:scale-95 transition-all cursor-pointer disabled:opacity-50"
               title="Lưu các tọa độ và kích thước hiện tại trực tiếp vào code"
             >
               <Save className="w-3.5 h-3.5" />
@@ -473,7 +473,7 @@ export const AdminPlacementStudio: React.FC<AdminPlacementStudioProps> = ({
           <button
             type="button"
             onClick={handleLogout}
-            className="p-1.5 rounded-xl bg-stone-850 hover:bg-stone-800 border border-stone-700 text-stone-400 hover:text-red-400 text-xs transition-colors cursor-pointer"
+            className="p-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-400 hover:text-red-400 text-xs transition-colors cursor-pointer"
             title="Đăng xuất"
           >
             <LogOut className="w-4 h-4" />

@@ -765,19 +765,19 @@ export const CertificateCanvas: React.FC<CertificateCanvasProps> = ({
       {/* Top Mode Segmented Switcher & Action Toolbar */}
       <div className="w-full flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5 mb-3 px-1">
         {/* Mode Toggle: Single vs Collage */}
-        <div className="inline-flex p-1 bg-stone-100 border border-stone-200 rounded-xl shadow-xs self-start sm:self-auto">
+        <div className="inline-flex p-1 bg-slate-100 border border-slate-200 rounded-xl shadow-xs self-start sm:self-auto">
           <button
             type="button"
             id="mode-single-btn"
             onClick={() => setViewMode('single')}
             className={`px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all cursor-pointer ${
               viewMode === 'single'
-                ? 'bg-white text-stone-900 shadow-xs border border-stone-200/80 font-bold'
-                : 'text-stone-500 hover:text-stone-900'
+                ? 'bg-white text-slate-900 shadow-xs border border-slate-200/80 font-bold'
+                : 'text-slate-500 hover:text-slate-900'
             }`}
           >
             <span>Chứng nhận đơn</span>
-            <span className="text-[10px] text-stone-400 font-normal">(1080×2400)</span>
+            <span className="text-[10px] text-slate-400 font-normal">(1080×2400)</span>
           </button>
           <button
             type="button"
@@ -785,13 +785,13 @@ export const CertificateCanvas: React.FC<CertificateCanvasProps> = ({
             onClick={() => setViewMode('collage')}
             className={`px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all cursor-pointer ${
               viewMode === 'collage'
-                ? 'bg-white text-stone-900 shadow-xs border border-stone-200/80 font-bold'
-                : 'text-stone-500 hover:text-stone-900'
+                ? 'bg-white text-slate-900 shadow-xs border border-slate-200/80 font-bold'
+                : 'text-slate-500 hover:text-slate-900'
             }`}
           >
             <Sparkles className="w-3.5 h-3.5 text-amber-500" />
             <span>Ghép ảnh cá nhân</span>
-            <span className="text-[10px] px-1.5 py-0.2 rounded bg-teal-50 text-teal-700 font-bold border border-teal-200/60">
+            <span className="text-[10px] px-1.5 py-0.2 rounded bg-rose-50 text-[#9F224E] font-bold border border-rose-200/60">
               {photoRatio}
             </span>
           </button>
@@ -806,14 +806,14 @@ export const CertificateCanvas: React.FC<CertificateCanvasProps> = ({
               onClick={() => setShowPlacementTool((prev) => !prev)}
               className={`px-3 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all shadow-2xs cursor-pointer active:scale-95 ${
                 showPlacementTool
-                  ? 'bg-teal-750 text-white shadow-sm ring-2 ring-teal-600/30'
-                  : 'bg-teal-50 hover:bg-teal-100 text-teal-900 border border-teal-200/90'
+                  ? 'bg-[#0F2847] text-white shadow-sm ring-2 ring-[#0F2847]/30'
+                  : 'bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-200'
               }`}
               title="Bật/Tắt công cụ chỉnh vị trí và cỡ chữ với preview trực tiếp"
             >
-              <Sliders className={`w-4 h-4 ${showPlacementTool ? 'text-cyan-300' : 'text-teal-600'}`} />
+              <Sliders className={`w-4 h-4 ${showPlacementTool ? 'text-amber-400' : 'text-slate-600'}`} />
               <span>{showPlacementTool ? 'Đang chỉnh vị trí' : 'Chỉnh vị trí & Size text'}</span>
-              {showPlacementTool && <span className="w-2 h-2 rounded-full bg-cyan-300 animate-pulse ml-0.5" />}
+              {showPlacementTool && <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse ml-0.5" />}
             </button>
           )}
 
@@ -821,10 +821,10 @@ export const CertificateCanvas: React.FC<CertificateCanvasProps> = ({
             type="button"
             id="share-cert-btn"
             onClick={handleShare}
-            className="p-2 px-3 rounded-xl bg-white border border-stone-200 text-stone-700 hover:text-stone-900 hover:bg-stone-50 text-xs font-medium flex items-center gap-1.5 transition-colors shadow-xs"
+            className="p-2 px-3 rounded-xl bg-white border border-slate-200 text-slate-700 hover:text-slate-900 hover:bg-slate-50 text-xs font-medium flex items-center gap-1.5 transition-colors shadow-xs"
             title="Chia sẻ đường dẫn"
           >
-            {copiedLink ? <Check className="w-4 h-4 text-emerald-600" /> : <Share2 className="w-4 h-4 text-stone-500" />}
+            {copiedLink ? <Check className="w-4 h-4 text-emerald-600" /> : <Share2 className="w-4 h-4 text-slate-500" />}
             <span className="hidden sm:inline">{copiedLink ? 'Đã sao chép' : 'Chia sẻ'}</span>
           </button>
 
@@ -833,9 +833,9 @@ export const CertificateCanvas: React.FC<CertificateCanvasProps> = ({
             id="download-cert-btn"
             onClick={handleDownload}
             disabled={isDownloading}
-            className="px-4 py-2 bg-stone-900 hover:bg-stone-800 text-white font-semibold text-xs rounded-xl shadow-xs flex items-center gap-2 transition-all transform active:scale-95 disabled:opacity-50 cursor-pointer"
+            className="px-4.5 py-2.5 bg-gradient-to-r from-[#9F224E] via-[#B81B4B] to-[#9F224E] hover:from-[#881337] hover:to-[#9F224E] text-white font-bold text-xs rounded-xl shadow-md shadow-rose-950/20 flex items-center gap-2 transition-all transform active:scale-95 disabled:opacity-50 cursor-pointer"
           >
-            {isDownloading ? <RefreshCw className="w-4 h-4 animate-spin text-stone-300" /> : <Download className="w-4 h-4" />}
+            {isDownloading ? <RefreshCw className="w-4 h-4 animate-spin text-white/80" /> : <Download className="w-4 h-4" />}
             <span>
               {isDownloading
                 ? 'Đang xuất ảnh...'
@@ -853,7 +853,7 @@ export const CertificateCanvas: React.FC<CertificateCanvasProps> = ({
       {viewMode === 'collage' && (
         <div
           id="collage-control-bar"
-          className="w-full mb-3 p-3 bg-white border border-stone-200/90 rounded-2xl shadow-xs flex flex-col md:flex-row items-stretch md:items-center justify-between gap-2.5 text-xs"
+          className="w-full mb-3 p-3 bg-white border border-slate-200/90 rounded-2xl shadow-xs flex flex-col md:flex-row items-stretch md:items-center justify-between gap-2.5 text-xs"
         >
           {/* Left: Upload & Photo Source Controls */}
           <div className="flex items-center gap-2 flex-wrap">
@@ -861,7 +861,7 @@ export const CertificateCanvas: React.FC<CertificateCanvasProps> = ({
               type="button"
               id="upload-personal-photo-btn"
               onClick={() => personalFileInputRef.current?.click()}
-              className="px-3 py-1.5 bg-stone-900 hover:bg-stone-800 text-white font-medium rounded-lg flex items-center gap-1.5 transition-colors shadow-xs cursor-pointer"
+              className="px-3 py-1.5 bg-[#0F2847] hover:bg-[#1E3A5F] text-white font-semibold rounded-lg flex items-center gap-1.5 transition-colors shadow-xs cursor-pointer"
               title="Tải ảnh chạy bộ của bạn lên"
             >
               <Upload className="w-3.5 h-3.5" />
@@ -873,7 +873,7 @@ export const CertificateCanvas: React.FC<CertificateCanvasProps> = ({
                 type="button"
                 id="remove-personal-photo-btn"
                 onClick={handleRemovePhoto}
-                className="px-2.5 py-1.5 bg-white hover:bg-rose-50 hover:text-rose-600 border border-stone-200 text-stone-600 rounded-lg flex items-center gap-1 transition-colors cursor-pointer"
+                className="px-2.5 py-1.5 bg-white hover:bg-rose-50 hover:text-rose-600 border border-slate-200 text-slate-600 rounded-lg flex items-center gap-1 transition-colors cursor-pointer"
                 title="Xóa ảnh hiện tại"
               >
                 <Trash2 className="w-3.5 h-3.5" />
@@ -884,22 +884,22 @@ export const CertificateCanvas: React.FC<CertificateCanvasProps> = ({
                 type="button"
                 id="sample-photo-btn"
                 onClick={handleUseSamplePhoto}
-                className="px-2.5 py-1.5 bg-stone-100 hover:bg-stone-200 border border-stone-200 text-stone-700 rounded-lg flex items-center gap-1 transition-colors cursor-pointer"
+                className="px-2.5 py-1.5 bg-slate-100 hover:bg-slate-200 border border-slate-200 text-slate-700 rounded-lg flex items-center gap-1 transition-colors cursor-pointer"
                 title="Dùng ảnh vận động viên mẫu để xem trước"
               >
-                <ImageIcon className="w-3.5 h-3.5 text-stone-500" />
+                <ImageIcon className="w-3.5 h-3.5 text-slate-500" />
                 <span>Dùng ảnh mẫu</span>
               </button>
             )}
 
             {/* Layout switch: Photo on Left vs Photo on Right */}
-            <div className="flex items-center gap-1 bg-stone-100 p-0.5 rounded-lg border border-stone-200">
+            <div className="flex items-center gap-1 bg-slate-100 p-0.5 rounded-lg border border-slate-200">
               <button
                 type="button"
                 id="layout-photo-left-btn"
                 onClick={() => setPhotoSide('left')}
                 className={`px-2.5 py-1 rounded text-[11px] font-semibold transition-colors cursor-pointer ${
-                  photoSide === 'left' ? 'bg-white text-stone-900 shadow-xs' : 'text-stone-500 hover:text-stone-900'
+                  photoSide === 'left' ? 'bg-white text-slate-900 shadow-xs' : 'text-slate-500 hover:text-slate-900'
                 }`}
                 title="Ảnh cá nhân bên Trái, Chứng nhận bên Phải"
               >
@@ -910,7 +910,7 @@ export const CertificateCanvas: React.FC<CertificateCanvasProps> = ({
                 id="layout-photo-right-btn"
                 onClick={() => setPhotoSide('right')}
                 className={`px-2.5 py-1 rounded text-[11px] font-semibold transition-colors cursor-pointer ${
-                  photoSide === 'right' ? 'bg-white text-stone-900 shadow-xs' : 'text-stone-500 hover:text-stone-900'
+                  photoSide === 'right' ? 'bg-white text-slate-900 shadow-xs' : 'text-slate-500 hover:text-slate-900'
                 }`}
                 title="Chứng nhận bên Trái, Ảnh cá nhân bên Phải"
               >
@@ -919,26 +919,26 @@ export const CertificateCanvas: React.FC<CertificateCanvasProps> = ({
             </div>
 
             {/* Frame Ratio Selector: Cân đối (1:1 Bằng Cert) vs Rộng (2:1) vs Gọn (3/5) */}
-            <div className="flex items-center gap-1 bg-stone-100 p-0.5 rounded-lg border border-stone-200">
-              <span className="text-[10px] text-stone-500 font-semibold px-1 hidden sm:inline">Khung ảnh:</span>
+            <div className="flex items-center gap-1 bg-slate-100 p-0.5 rounded-lg border border-slate-200">
+              <span className="text-[10px] text-slate-500 font-semibold px-1 hidden sm:inline">Khung ảnh:</span>
               <button
                 type="button"
                 id="ratio-equal-btn"
                 onClick={() => setPhotoRatio('1:1')}
                 className={`px-2.5 py-1 rounded text-[11px] font-semibold transition-colors cursor-pointer flex items-center gap-1 ${
-                  photoRatio === '1:1' ? 'bg-white text-stone-900 shadow-xs' : 'text-stone-500 hover:text-stone-900'
+                  photoRatio === '1:1' ? 'bg-white text-slate-900 shadow-xs' : 'text-slate-500 hover:text-slate-900'
                 }`}
                 title="Khung ảnh cá nhân ngang bằng với khung Certificate (Tỉ lệ 1:1 - Cân đối, Tổng 2160×2400)"
               >
                 <span>Bằng Cert (1:1)</span>
-                <span className="text-[9px] px-1 py-0.2 rounded bg-emerald-50 text-emerald-700 font-bold border border-emerald-200/60">Cân đối</span>
+                <span className="text-[9px] px-1 py-0.2 rounded bg-amber-50 text-amber-800 font-bold border border-amber-200">Cân đối</span>
               </button>
               <button
                 type="button"
                 id="ratio-wide-btn"
                 onClick={() => setPhotoRatio('2:1')}
                 className={`px-2.5 py-1 rounded text-[11px] font-semibold transition-colors cursor-pointer ${
-                  photoRatio === '2:1' ? 'bg-white text-stone-900 shadow-xs' : 'text-stone-500 hover:text-stone-900'
+                  photoRatio === '2:1' ? 'bg-white text-slate-900 shadow-xs' : 'text-slate-500 hover:text-slate-900'
                 }`}
                 title="Khung ảnh cá nhân rộng gấp đôi chứng nhận (Tỉ lệ 2:1 Toàn cảnh - Tổng 3240×2400)"
               >
@@ -949,7 +949,7 @@ export const CertificateCanvas: React.FC<CertificateCanvasProps> = ({
                 id="ratio-compact-btn"
                 onClick={() => setPhotoRatio('3:5')}
                 className={`px-2.5 py-1 rounded text-[11px] font-semibold transition-colors cursor-pointer ${
-                  photoRatio === '3:5' ? 'bg-white text-stone-900 shadow-xs' : 'text-stone-500 hover:text-stone-900'
+                  photoRatio === '3:5' ? 'bg-white text-slate-900 shadow-xs' : 'text-slate-500 hover:text-slate-900'
                 }`}
                 title="Khung ảnh cá nhân bằng 3/5 chiều ngang chứng nhận (Thu gọn - Tổng 1728×2400)"
               >
@@ -961,8 +961,8 @@ export const CertificateCanvas: React.FC<CertificateCanvasProps> = ({
           {/* Right: Zoom & Pan & Badge options */}
           <div className="flex items-center gap-2.5 flex-wrap md:justify-end">
             {/* Zoom Slider */}
-            <div className="flex items-center gap-2 bg-stone-50 px-2.5 py-1 rounded-lg border border-stone-200">
-              <ZoomOut className="w-3.5 h-3.5 text-stone-400" />
+            <div className="flex items-center gap-2 bg-slate-50 px-2.5 py-1 rounded-lg border border-slate-200">
+              <ZoomOut className="w-3.5 h-3.5 text-slate-400" />
               <input
                 id="photo-zoom-slider"
                 type="range"
@@ -971,11 +971,11 @@ export const CertificateCanvas: React.FC<CertificateCanvasProps> = ({
                 step="0.05"
                 value={photoZoom}
                 onChange={(e) => setPhotoZoom(parseFloat(e.target.value))}
-                className="w-20 accent-stone-800 h-1 bg-stone-200 rounded cursor-pointer"
+                className="w-20 accent-[#9F224E] h-1 bg-slate-200 rounded cursor-pointer"
                 title="Phóng to / Thu nhỏ ảnh"
               />
-              <ZoomIn className="w-3.5 h-3.5 text-stone-400" />
-              <span className="text-[11px] font-mono text-stone-700 w-9 text-right font-medium">
+              <ZoomIn className="w-3.5 h-3.5 text-slate-400" />
+              <span className="text-[11px] font-mono text-slate-700 w-9 text-right font-medium">
                 {Math.round(photoZoom * 100)}%
               </span>
             </div>
@@ -985,7 +985,7 @@ export const CertificateCanvas: React.FC<CertificateCanvasProps> = ({
               type="button"
               id="reset-photo-pos-btn"
               onClick={handleResetPhotoPosition}
-              className="p-1.5 text-stone-500 hover:text-stone-900 bg-stone-50 hover:bg-stone-100 border border-stone-200 rounded-lg transition-colors cursor-pointer"
+              className="p-1.5 text-slate-500 hover:text-slate-900 bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-lg transition-colors cursor-pointer"
               title="Đặt lại vị trí căn giữa ban đầu"
             >
               <RotateCcw className="w-3.5 h-3.5" />
@@ -1287,26 +1287,26 @@ export const CertificateCanvas: React.FC<CertificateCanvasProps> = ({
           onDrop={handleDrop}
           className={`relative ${
             showPlacementTool ? 'flex-1 w-full min-w-0' : 'w-full'
-          } rounded-2xl overflow-hidden shadow-xs border bg-[#f4f4f4] flex flex-col items-center justify-center p-2 sm:p-4 group transition-all ${
-            isDragging ? 'border-stone-900 ring-2 ring-stone-900/10' : 'border-stone-200/90'
+          } rounded-2xl overflow-hidden shadow-xs border bg-slate-100/70 flex flex-col items-center justify-center p-2 sm:p-4 group transition-all ${
+            isDragging ? 'border-[#9F224E] ring-2 ring-[#9F224E]/20' : 'border-slate-200/90'
           }`}
         >
           {/* Visual helper badge */}
-          <div className="absolute top-3 left-3 z-10 hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-white/90 border border-stone-200 backdrop-blur-md text-[11px] text-stone-600 shadow-xs pointer-events-none">
+          <div className="absolute top-3 left-3 z-10 hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-white/95 border border-slate-200 backdrop-blur-md text-[11px] text-slate-700 shadow-xs pointer-events-none">
             {showPlacementTool ? (
               <>
-                <Target className="w-3.5 h-3.5 text-teal-600 animate-pulse" />
-                <span className="font-semibold text-teal-900">Live Preview trực tiếp</span>
+                <Target className="w-3.5 h-3.5 text-[#9F224E] animate-pulse" />
+                <span className="font-semibold text-slate-900">Live Preview trực tiếp</span>
               </>
             ) : viewMode === 'collage' ? (
               <>
-                <Move className="w-3.5 h-3.5 text-stone-500" />
+                <Move className="w-3.5 h-3.5 text-slate-500" />
                 <span>Kéo chuột trên ảnh để căn chỉnh vị trí</span>
               </>
             ) : (
               <>
-                <span className="w-1.5 h-1.5 rounded-full bg-teal-600"></span>
-                <span>Kéo thả ảnh để đổi phôi chứng nhận</span>
+                <span className="w-2 h-2 rounded-full bg-[#9F224E]"></span>
+                <span className="font-medium text-slate-700">Kéo thả ảnh để đổi phôi chứng nhận</span>
               </>
             )}
           </div>
@@ -1367,19 +1367,19 @@ export const CertificateCanvas: React.FC<CertificateCanvasProps> = ({
           id="mobile-save-image-modal"
           className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/60 backdrop-blur-xs p-3 sm:p-6 animate-in fade-in duration-200"
         >
-          <div className="bg-white w-full max-w-lg rounded-2xl sm:rounded-3xl shadow-2xl border border-stone-200 overflow-hidden flex flex-col max-h-[92vh] animate-in slide-in-from-bottom-3 duration-200">
+          <div className="bg-white w-full max-w-lg rounded-2xl sm:rounded-3xl shadow-2xl border border-slate-200 overflow-hidden flex flex-col max-h-[92vh] animate-in slide-in-from-bottom-3 duration-200">
             {/* Modal Header */}
-            <div className="flex items-center justify-between px-4 py-3 border-b border-stone-100 bg-stone-50/70">
+            <div className="flex items-center justify-between px-4 py-3 border-b border-slate-100 bg-slate-50/80">
               <div className="flex items-center gap-2">
-                <Smartphone className="w-4 h-4 text-teal-600" />
-                <span className="font-bold text-stone-900 text-sm">
+                <Smartphone className="w-4 h-4 text-[#9F224E]" />
+                <span className="font-bold text-slate-900 text-sm">
                   Lưu ảnh vào Thư viện điện thoại
                 </span>
               </div>
               <button
                 type="button"
                 onClick={() => setShowSaveModal(false)}
-                className="p-1.5 text-stone-400 hover:text-stone-700 hover:bg-stone-200/60 rounded-full transition-colors cursor-pointer"
+                className="p-1.5 text-slate-400 hover:text-slate-700 hover:bg-slate-200/60 rounded-full transition-colors cursor-pointer"
                 title="Đóng"
               >
                 <X className="w-4 h-4" />
@@ -1389,20 +1389,20 @@ export const CertificateCanvas: React.FC<CertificateCanvasProps> = ({
             {/* Modal Body: Instructions & High-res Image Preview */}
             <div className="p-4 space-y-3 overflow-y-auto flex-1 text-xs">
               {/* Highlight Instruction Box */}
-              <div className="bg-amber-50 border border-amber-200/80 rounded-xl p-3 text-amber-900 space-y-1.5">
-                <div className="font-bold flex items-center gap-1.5 text-xs text-amber-950">
+              <div className="bg-rose-50/70 border border-rose-200/80 rounded-xl p-3 text-slate-800 space-y-1.5">
+                <div className="font-bold flex items-center gap-1.5 text-xs text-[#9F224E]">
                   <span>💡 Cách lưu thẳng vào Thư viện ảnh (Cuộn camera):</span>
                 </div>
-                <p className="text-[11px] text-amber-800 leading-relaxed">
+                <p className="text-[11px] text-slate-700 leading-relaxed">
                   • <strong>Cách 1 (Dễ nhất):</strong> Chạm và <strong>GIỮ tay vào ảnh</strong> bên dưới 1-2 giây &gt; Chọn <strong>"Lưu vào Ảnh"</strong> (Save to Photos) hoặc <strong>"Tải hình ảnh xuống"</strong>.
                 </p>
-                <p className="text-[11px] text-amber-800 leading-relaxed">
-                  • <strong>Cách 2:</strong> Bấm nút <strong>"Lưu vào Thư viện ảnh"</strong> màu đen bên dưới để mở bảng chia sẻ hệ thống và chọn "Lưu hình ảnh".
+                <p className="text-[11px] text-slate-700 leading-relaxed">
+                  • <strong>Cách 2:</strong> Bấm nút <strong>"Lưu vào Thư viện ảnh"</strong> bên dưới để mở bảng chia sẻ hệ thống và chọn "Lưu hình ảnh".
                 </p>
               </div>
 
               {/* High-Resolution Rendered Image Preview (Supports Long-Press Save) */}
-              <div className="relative border border-stone-200 rounded-xl overflow-hidden bg-stone-100 flex items-center justify-center p-1.5 shadow-inner">
+              <div className="relative border border-slate-200 rounded-xl overflow-hidden bg-slate-100 flex items-center justify-center p-1.5 shadow-inner">
                 <img
                   src={exportedImageUrl}
                   alt={`Chứng nhận Finisher ${runner.name}`}
@@ -1412,7 +1412,7 @@ export const CertificateCanvas: React.FC<CertificateCanvasProps> = ({
             </div>
 
             {/* Modal Footer Buttons */}
-            <div className="p-3 border-t border-stone-100 bg-stone-50/80 flex flex-col sm:flex-row gap-2">
+            <div className="p-3 border-t border-slate-100 bg-slate-50/80 flex flex-col sm:flex-row gap-2">
               {exportedImageFile && (
                 <button
                   type="button"
@@ -1436,9 +1436,9 @@ export const CertificateCanvas: React.FC<CertificateCanvasProps> = ({
                       document.body.removeChild(link);
                     }
                   }}
-                  className="flex-1 py-2.5 px-3 bg-stone-900 hover:bg-stone-800 text-white font-semibold rounded-xl text-xs flex items-center justify-center gap-1.5 shadow-xs cursor-pointer"
+                  className="flex-1 py-2.5 px-3 bg-[#9F224E] hover:bg-[#881337] text-white font-bold rounded-xl text-xs flex items-center justify-center gap-1.5 shadow-xs cursor-pointer"
                 >
-                  <Share2 className="w-3.5 h-3.5 text-teal-400" />
+                  <Share2 className="w-3.5 h-3.5 text-white/90" />
                   <span>Lưu vào Thư viện ảnh (Share)</span>
                 </button>
               )}
@@ -1454,9 +1454,9 @@ export const CertificateCanvas: React.FC<CertificateCanvasProps> = ({
                   link.click();
                   document.body.removeChild(link);
                 }}
-                className="py-2.5 px-3 bg-white hover:bg-stone-100 border border-stone-300 text-stone-700 font-semibold rounded-xl text-xs flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
+                className="py-2.5 px-3 bg-white hover:bg-slate-100 border border-slate-300 text-slate-700 font-semibold rounded-xl text-xs flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
               >
-                <Download className="w-3.5 h-3.5" />
+                <Download className="w-3.5 h-3.5 text-slate-500" />
                 <span>Tải file về máy (Tệp / Downloads)</span>
               </button>
             </div>

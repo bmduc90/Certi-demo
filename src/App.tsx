@@ -403,7 +403,7 @@ export default function App() {
   }
 
   return (
-    <div className="min-h-screen bg-stone-50 text-stone-800 flex flex-col font-sans selection:bg-teal-500 selection:text-white">
+    <div className="min-h-screen bg-slate-50 text-slate-800 flex flex-col font-sans selection:bg-[#9F224E] selection:text-white">
       {/* Top Navbar with race selector */}
       <Navbar
         activeRace={activeRace}
@@ -434,18 +434,18 @@ export default function App() {
         )}
 
         {/* 1. Search Bar Section (Same 100% width of max-w-5xl) */}
-        <section className="w-full bg-white border border-stone-200/90 rounded-2xl p-4 sm:p-6 shadow-xs space-y-3.5">
+        <section className="w-full bg-white border border-slate-200/90 rounded-2xl p-4 sm:p-6 shadow-xs space-y-3.5">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
             <div>
-              <h2 className="text-base font-bold text-stone-900 flex items-center gap-2">
-                <span className={`w-2 h-2 rounded-full ${activeRace.themeDotBg}`}></span>
+              <h2 className="text-base font-bold text-slate-900 flex items-center gap-2">
+                <span className="w-2.5 h-2.5 rounded-full bg-[#9F224E]"></span>
                 Tra cứu kết quả & Chứng nhận {activeRace.shortName}
               </h2>
-              <p className="text-xs text-stone-500 mt-0.5">
+              <p className="text-xs text-slate-500 mt-0.5">
                 Tìm kiếm theo số BIB hoặc Họ tên vận động viên
               </p>
             </div>
-            <span className="self-start sm:self-auto text-[11px] font-mono px-2 py-0.5 rounded-full bg-stone-100 text-stone-600 border border-stone-200">
+            <span className="self-start sm:self-auto text-[11px] font-mono px-2.5 py-0.5 rounded-full bg-rose-50 text-[#9F224E] border border-rose-200/80 font-bold">
               Giải: {activeRace.code}
             </span>
           </div>
@@ -468,17 +468,17 @@ export default function App() {
         </section>
 
         {/* 2. Certificate Display Section (Same 100% width of max-w-5xl) */}
-        <section className="w-full bg-white border border-stone-200/90 rounded-2xl p-3.5 sm:p-5 shadow-xs space-y-3">
+        <section className="w-full bg-white border border-slate-200/90 rounded-2xl p-3.5 sm:p-5 shadow-xs space-y-3">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <span className="text-xs font-bold text-stone-700 uppercase tracking-wider">
+              <span className="text-xs font-bold text-slate-800 uppercase tracking-wider">
                 Bản xem trước chứng nhận & Ảnh ghép Finisher
               </span>
-              <span className="text-[10px] px-2 py-0.5 rounded-full bg-stone-100 text-stone-600 font-semibold border border-stone-200">
+              <span className="text-[10px] px-2.5 py-0.5 rounded-full bg-[#0F2847] text-white font-bold tracking-wide shadow-2xs">
                 Chuẩn in 300 DPI
               </span>
             </div>
-            <span className="text-[11px] text-stone-500 font-medium hidden sm:inline">
+            <span className="text-[11px] text-slate-500 font-medium hidden sm:inline">
               {activeRace.name}
             </span>
           </div>
@@ -498,17 +498,17 @@ export default function App() {
       </main>
 
       {/* Footer */}
-      <footer className="w-full border-t border-stone-200 bg-white py-5 text-center text-xs text-stone-500">
+      <footer className="w-full border-t border-slate-200/90 bg-white py-6 text-center text-xs text-slate-500">
         <div className="flex items-center justify-center gap-3 mb-1 flex-wrap">
-          <p>© 2026 {activeRace.name} • Tra cứu kết quả & Chứng nhận điện tử</p>
-          <span className="text-stone-300 hidden sm:inline">•</span>
+          <p>© 2026 {activeRace.name} • Tra cứu kết quả & Chứng nhận điện tử chính thức</p>
+          <span className="text-slate-300 hidden sm:inline">•</span>
           <button
             type="button"
             onClick={() => {
               window.history.pushState({}, '', '/admin');
               setIsAdminRoute(true);
             }}
-            className="text-stone-400 hover:text-teal-700 font-medium transition-colors cursor-pointer text-xs"
+            className="text-slate-400 hover:text-[#9F224E] font-medium transition-colors cursor-pointer text-xs"
           >
             Quản trị Admin
           </button>
