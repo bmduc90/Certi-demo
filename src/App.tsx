@@ -6,6 +6,7 @@ import { RunnerDetailsCard } from './components/RunnerDetailsCard';
 import { AdminPlacementStudio } from './components/AdminPlacementStudio';
 import { Runner, CertificateConfig, DataSourceSettings } from './types';
 import { Race, RACES, DEFAULT_RACE } from './data/races';
+import { INITIAL_RUNNERS, DEMO_RUNNERS, DEMO_PHOTOS } from './data/mockRunners';
 import {
   fetchAllRaces,
   getLocalRaces,
@@ -21,6 +22,7 @@ import {
   saveDataSourceSettings,
   fetchRunnersFromSource,
   getDirectGoogleDriveImageUrl,
+  getCachedRunners,
 } from './services/sheetService';
 import { AlertCircle } from 'lucide-react';
 
@@ -63,15 +65,34 @@ export default function App() {
   const refreshRacesList = useCallback(async () => {
     const list = await fetchAllRaces();
     setAllRaces(list);
-    return;
+    setActiveRace((prev) => {
+      const match = list.find((r) => r.id === prev.id || r.slug === prev.slug);
+      return match ? match : prev;
+    });
   }, []);
 
   useEffect(() => {
     refreshRacesList();
   }, [refreshRacesList]);
 
-  const [runners, setRunners] = useState<Runner[]>(activeRace.initialRunners);
-  const [selectedRunner, setSelectedRunner] = useState<Runner>(activeRace.initialRunners[0]);
+  const [runners, setRunners] = useState<Runner[]>(() => {
+    const cached = getCachedRunners(activeRace.storageKeyPrefix);
+    if (cached && cached.length > 0) return cached;
+    return activeRace.initialRunners && activeRace.initialRunners.length > 0
+      ? activeRace.initialRunners
+      : INITIAL_RUNNERS;
+  });
+  const [selectedRunner, setSelectedRunner] = useState<Runner>(() => {
+    const cached = getCachedRunners(activeRace.storageKeyPrefix);
+    if (cached && cached.length > 0) {
+      const first = cached[0];
+      const photoMap = activeRace.demoPhotos || DEMO_PHOTOS;
+      const photo = photoMap[first.bib];
+      return photo ? { ...first, photoUrl: photo } : first;
+    }
+    return (activeRace.initialRunners && activeRace.initialRunners[0]) || INITIAL_RUNNERS[0];
+  });
+  const [isLoadingRunners, setIsLoadingRunners] = useState<boolean>(false);
   const [config, setConfig] = useState<CertificateConfig>(() => {
     try {
       const saved = localStorage.getItem(`vm_certificate_config_${activeRace.id}`) || localStorage.getItem('vm_certificate_config');
@@ -223,65 +244,77 @@ export default function App() {
   // Load runners for specific race
   const loadRunnersForRace = useCallback(
     async (settings: DataSourceSettings, targetRace: Race) => {
-      // If race has specific Apps Script URL, prioritize using it
-      const raceSpecificSettings: DataSourceSettings = {
-        ...settings,
-        url: targetRace.appsScriptUrl || settings.url || '/api/marathon-data',
-        type: 'appsScript',
-      };
+      setIsLoadingRunners(true);
+      try {
+        // If race has specific Apps Script URL, prioritize using it
+        const raceSpecificSettings: DataSourceSettings = {
+          ...settings,
+          url: targetRace.appsScriptUrl || settings.url || '/api/marathon-data',
+          type: 'appsScript',
+        };
 
-      const res = await fetchRunnersFromSource(
-        raceSpecificSettings,
-        targetRace.storageKeyPrefix,
-        targetRace.initialRunners
-      );
+        const res = await fetchRunnersFromSource(
+          raceSpecificSettings,
+          targetRace.storageKeyPrefix,
+          targetRace.initialRunners
+        );
 
-      if (res.backgroundUrl) {
-        const directBg = getDirectGoogleDriveImageUrl(res.backgroundUrl) || res.backgroundUrl;
-        if (!directBg.includes('QN26') && !directBg.includes('quynhon') && !directBg.includes('17cfwL9HAxh2_tRgvdMp66URxzh6wLj46')) {
-          setConfig((prev) => ({
-            ...prev,
-            bgMode: 'custom',
-            customBgDataUrl: directBg,
-          }));
-        } else {
-          setConfig((prev) => ({
-            ...prev,
-            bgMode: 'custom',
-            customBgDataUrl: targetRace.defaultBgUrl || '/NA26.png',
-          }));
-        }
-      }
-
-      if (res.logoUrl) {
-        const directLogo = getDirectGoogleDriveImageUrl(res.logoUrl) || res.logoUrl;
-        setLogoUrl(directLogo);
-        try {
-          localStorage.setItem(`${targetRace.storageKeyPrefix}_logo_url`, directLogo);
-        } catch {
-          // ignore
-        }
-      }
-
-      if (res.runners && res.runners.length > 0) {
-        setRunners(res.runners);
-        setSelectedRunner((current) => {
-          if (!current) return res.runners[0];
-          // Check if current runner exists in new list or matches demo runner
-          const isDemo = targetRace.demoRunners.find((d) => d.bib === current.bib);
-          if (isDemo) {
-            const demoPhoto = targetRace.demoPhotos[isDemo.bib];
-            return demoPhoto ? { ...isDemo, photoUrl: demoPhoto } : isDemo;
+        if (res.backgroundUrl) {
+          const directBg = getDirectGoogleDriveImageUrl(res.backgroundUrl) || res.backgroundUrl;
+          if (!directBg.includes('QN26') && !directBg.includes('quynhon') && !directBg.includes('17cfwL9HAxh2_tRgvdMp66URxzh6wLj46')) {
+            setConfig((prev) => ({
+              ...prev,
+              bgMode: 'custom',
+              customBgDataUrl: directBg,
+            }));
+          } else {
+            setConfig((prev) => ({
+              ...prev,
+              bgMode: 'custom',
+              customBgDataUrl: targetRace.defaultBgUrl || '/NA26.png',
+            }));
           }
-          const found = res.runners.find((r) => r.bib === current.bib);
-          return found || res.runners[0];
-        });
-      }
+        }
 
-      if (res.error) {
-        setSyncError(res.error);
-      } else {
-        setSyncError(null);
+        if (res.logoUrl) {
+          const directLogo = getDirectGoogleDriveImageUrl(res.logoUrl) || res.logoUrl;
+          setLogoUrl(directLogo);
+          try {
+            localStorage.setItem(`${targetRace.storageKeyPrefix}_logo_url`, directLogo);
+          } catch {
+            // ignore
+          }
+        }
+
+        if (res.runners && res.runners.length > 0) {
+          setRunners(res.runners);
+          setSelectedRunner((current) => {
+            const photoMap = targetRace.demoPhotos || DEMO_PHOTOS;
+            if (!current) {
+              const first = res.runners[0];
+              const p = photoMap[first.bib];
+              return p ? { ...first, photoUrl: p } : first;
+            }
+            // Prioritize finding current runner in the freshly loaded runners
+            const found = res.runners.find((r) => r.bib.toLowerCase() === current.bib.toLowerCase());
+            if (found) {
+              const p = photoMap[found.bib];
+              return p ? { ...found, photoUrl: p } : found;
+            }
+            // If current runner is not in the new sheet, switch to the first runner of the new sheet
+            const first = res.runners[0];
+            const p = photoMap[first.bib];
+            return p ? { ...first, photoUrl: p } : first;
+          });
+        }
+
+        if (res.error) {
+          setSyncError(res.error);
+        } else {
+          setSyncError(null);
+        }
+      } finally {
+        setIsLoadingRunners(false);
       }
     },
     []
@@ -316,6 +349,20 @@ export default function App() {
     // Load data source settings and runners
     const currentSettings = getSavedDataSourceSettings(activeRace.storageKeyPrefix);
     setDataSourceSettings(currentSettings);
+
+    // Instant local cache preload if available
+    const cached = getCachedRunners(activeRace.storageKeyPrefix);
+    if (cached && cached.length > 0) {
+      setRunners(cached);
+      setSelectedRunner((current) => {
+        const photoMap = activeRace.demoPhotos || DEMO_PHOTOS;
+        const found = cached.find((r) => r.bib.toLowerCase() === current?.bib?.toLowerCase());
+        const target = found || cached[0];
+        const p = photoMap[target.bib];
+        return p ? { ...target, photoUrl: p } : target;
+      });
+    }
+
     loadRunnersForRace(currentSettings, activeRace);
   }, [activeRace, loadRunnersForRace]);
 
@@ -326,7 +373,8 @@ export default function App() {
     if (bibParam && runners.length > 0) {
       const match = runners.find((r) => r.bib.toLowerCase() === bibParam.toLowerCase());
       if (match) {
-        const demoPhoto = activeRace.demoPhotos[match.bib];
+        const photoMap = activeRace.demoPhotos || DEMO_PHOTOS;
+        const demoPhoto = photoMap[match.bib];
         setSelectedRunner(demoPhoto ? { ...match, photoUrl: demoPhoto } : match);
       }
     }
@@ -405,8 +453,12 @@ export default function App() {
           <SearchRunner
             runners={runners}
             selectedRunner={selectedRunner}
+            isLoading={isLoadingRunners}
+            demoRunners={activeRace.demoRunners}
+            demoPhotos={activeRace.demoPhotos}
             onSelectRunner={(runner) => {
-              const demoPhoto = activeRace.demoPhotos[runner.bib];
+              const photoMap = activeRace.demoPhotos || DEMO_PHOTOS;
+              const demoPhoto = photoMap[runner.bib];
               const withPhoto = demoPhoto
                 ? { ...runner, photoUrl: demoPhoto }
                 : runner;

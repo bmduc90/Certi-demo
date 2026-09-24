@@ -8,7 +8,7 @@ const RUNNERS_CACHE_KEY = 'vm_quynhon_runners_cache';
 export const MARATHON_PROXY_ENDPOINT = '/api/marathon-data';
 export const USER_APPS_SCRIPT_URL = '/api/marathon-data';
 export const DIRECT_APPS_SCRIPT_URL =
-  'https://script.google.com/macros/s/AKfycbwvqwP__bXjxWG8WgH_Qjy8ypBztY8P2bAaQDdLvVckyA-KQtoJ7Hyzk8E-6WpTlrR1/exec?key=ducbm900966559155';
+  'https://script.google.com/macros/s/AKfycbwwY2MgGaURMrB20UHGVvUZ3INSOrkd8jIQok1JpnDTWMzblecdDOdDTn7qtrbtPPzquw/exec?key=ducbm900966559155';
 
 export const getDirectGoogleDriveImageUrl = (url: string | null | undefined): string | null => {
   if (!url) return null;
@@ -19,18 +19,28 @@ export const getDirectGoogleDriveImageUrl = (url: string | null | undefined): st
   return url;
 };
 
+export const getCachedRunners = (prefix: string = 'vm_quynhon'): Runner[] | null => {
+  const cacheKey = `${prefix}_cached_runners`;
+  try {
+    const cached = localStorage.getItem(cacheKey);
+    if (cached) {
+      const parsed = JSON.parse(cached);
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        return parsed;
+      }
+    }
+  } catch (e) {
+    console.error('Error reading cached runners:', e);
+  }
+  return null;
+};
+
 export const getSavedDataSourceSettings = (prefix: string = 'vm_quynhon'): DataSourceSettings => {
   const settingsKey = `${prefix}_datasource_settings`;
   try {
     const saved = localStorage.getItem(settingsKey);
     if (saved) {
       const parsed: DataSourceSettings = JSON.parse(saved);
-      // Auto-migrate legacy script.google.com URLs to secure backend proxy /api/marathon-data
-      if (parsed.url && (parsed.url.includes('script.google.com') || parsed.url.includes('AKfycbwvqwP__bXjxWG8WgH'))) {
-        parsed.url = MARATHON_PROXY_ENDPOINT;
-        parsed.type = 'appsScript';
-        localStorage.setItem(settingsKey, JSON.stringify(parsed));
-      }
       return parsed;
     }
   } catch (e) {

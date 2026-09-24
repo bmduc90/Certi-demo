@@ -59,7 +59,10 @@ export const PlacementEditorPanel: React.FC<PlacementEditorPanelProps> = ({
   const fields: CertificateFieldPlacement[] = Object.values(placements);
 
   const activeField: CertificateFieldPlacement =
-    placements[activeFieldId] || DEFAULT_NGHE_AN_PLACEMENTS[activeFieldId] || fields[0];
+    placements[activeFieldId] ||
+    DEFAULT_NGHE_AN_PLACEMENTS[activeFieldId] ||
+    fields[0] ||
+    DEFAULT_NGHE_AN_PLACEMENTS.name;
 
   const updateField = (patch: Partial<CertificateFieldPlacement>) => {
     const updated = {

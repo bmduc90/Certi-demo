@@ -18,9 +18,9 @@ export interface Race {
   themeBadgeBg: string;
   themeDotBg: string;
   storageKeyPrefix: string;
-  initialRunners: Runner[];
-  demoRunners: Runner[];
-  demoPhotos: Record<string, string>;
+  initialRunners?: Runner[];
+  demoRunners?: Runner[];
+  demoPhotos?: Record<string, string>;
   appsScriptUrl?: string;
   description: string;
   placements?: CertificatePlacements;
@@ -36,6 +36,28 @@ const CLONED_NGHE_AN_DEMO_RUNNERS: Runner[] = DEMO_RUNNERS.map((runner) => ({
   ...runner,
   date: '13/09/2026',
 }));
+
+/**
+ * Đảm bảo mọi giải đấu (kể cả tải động từ file .json hay API) luôn có danh sách vận động viên mặc định
+ */
+export function ensureRaceRunners(race: Race): Race {
+  if (!race) return DEFAULT_RACE;
+  const raceDate = race.date || '13/09/2026';
+  const fallbackList = INITIAL_RUNNERS.map((r) => ({ ...r, date: raceDate }));
+  return {
+    ...race,
+    initialRunners:
+      race.initialRunners && Array.isArray(race.initialRunners) && race.initialRunners.length > 0
+        ? race.initialRunners
+        : fallbackList,
+    demoRunners:
+      race.demoRunners && Array.isArray(race.demoRunners) && race.demoRunners.length > 0
+        ? race.demoRunners
+        : fallbackList,
+    demoPhotos:
+      race.demoPhotos && Object.keys(race.demoPhotos).length > 0 ? race.demoPhotos : DEMO_PHOTOS,
+  };
+}
 
 export const RACES: Race[] = [
   {
@@ -59,7 +81,7 @@ export const RACES: Race[] = [
     demoRunners: CLONED_NGHE_AN_DEMO_RUNNERS,
     demoPhotos: DEMO_PHOTOS,
     appsScriptUrl:
-      'https://script.google.com/macros/s/AKfycbwvqwP__bXjxWG8WgH_Qjy8ypBztY8P2bAaQDdLvVckyA-KQtoJ7Hyzk8E-6WpTlrR1/exec?key=ducbm900966559155',
+      'https://script.google.com/macros/s/AKfycbwwY2MgGaURMrB20UHGVvUZ3INSOrkd8jIQok1JpnDTWMzblecdDOdDTn7qtrbtPPzquw/exec?key=ducbm900966559155',
     description: 'Tra cứu kết quả & Chứng nhận điện tử VnExpress Marathon Grand Tour Nghe An 2026',
   },
 ];

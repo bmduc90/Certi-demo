@@ -605,8 +605,8 @@ export const drawCollageFrame = async (options: DrawCollageOptions): Promise<voi
     const centerY = totalH * 0.44;
 
     const isCompact = isCompactRatio;
-    const cardW = Math.min(Math.round(photoW * 0.88), isCompact ? 800 : 1600);
-    const cardH = Math.min(Math.round(totalH * 0.46), isCompact ? 1350 : 1550);
+    const cardW = Math.min(Math.round(photoW * 0.90), isCompact ? 950 : 1350);
+    const cardH = Math.min(Math.round(totalH * 0.48), isCompact ? 1450 : 1650);
     const cardX = centerX - cardW / 2;
     const cardY = centerY - cardH / 2;
 
@@ -626,15 +626,15 @@ export const drawCollageFrame = async (options: DrawCollageOptions): Promise<voi
     ctx.setLineDash([]);
     ctx.restore();
 
-    // Big Camera Icon Circle
-    const iconCircleR = isCompact ? 115 : isEqualRatio ? 140 : 160;
-    const iconCenterY = cardY + cardH * 0.26;
+    // Big Camera Icon Circle with Add (+) Badge
+    const iconCircleR = isCompact ? 135 : isEqualRatio ? 170 : 190;
+    const iconCenterY = cardY + cardH * 0.31;
 
     ctx.save();
     // Outer subtle ring
     ctx.fillStyle = '#e0f2fe';
     ctx.beginPath();
-    ctx.arc(centerX, iconCenterY, iconCircleR + 16, 0, Math.PI * 2);
+    ctx.arc(centerX, iconCenterY, iconCircleR + 22, 0, Math.PI * 2);
     ctx.fill();
 
     // Inner icon circle
@@ -646,17 +646,17 @@ export const drawCollageFrame = async (options: DrawCollageOptions): Promise<voi
     // Camera vector icon
     ctx.strokeStyle = '#0369a1';
     ctx.fillStyle = '#0369a1';
-    ctx.lineWidth = isCompact ? 8 : 10;
+    ctx.lineWidth = isCompact ? 10 : 13;
     ctx.lineJoin = 'round';
     ctx.lineCap = 'round';
 
-    const icW = iconCircleR * 0.95;
-    const icH = iconCircleR * 0.70;
+    const icW = iconCircleR * 0.92;
+    const icH = iconCircleR * 0.68;
     const icX = centerX;
     const icY = iconCenterY;
 
     // Camera body
-    roundRect(ctx, icX - icW / 2, icY - icH / 2 + 6, icW, icH, 16);
+    roundRect(ctx, icX - icW / 2, icY - icH / 2 + 6, icW, icH, 18);
     ctx.stroke();
 
     // Camera lens
@@ -665,60 +665,78 @@ export const drawCollageFrame = async (options: DrawCollageOptions): Promise<voi
     ctx.stroke();
 
     // Camera flash notch
-    roundRect(ctx, icX - icW * 0.22, icY - icH / 2 - 8, icW * 0.44, 14, 4);
+    roundRect(ctx, icX - icW * 0.22, icY - icH / 2 - 10, icW * 0.44, 16, 5);
     ctx.fill();
 
     // Small lens reflection
     ctx.fillStyle = '#0369a1';
     ctx.beginPath();
-    ctx.arc(icX + iconCircleR * 0.28, icY - icH / 2 + 18, 7, 0, Math.PI * 2);
+    ctx.arc(icX + iconCircleR * 0.28, icY - icH / 2 + 18, 8, 0, Math.PI * 2);
     ctx.fill();
+
+    // Plus (+) Badge at bottom-right of icon circle
+    const badgeR = iconCircleR * 0.36;
+    const badgeX = centerX + iconCircleR * 0.65;
+    const badgeY = iconCenterY + iconCircleR * 0.65;
+
+    // Badge background with border
+    ctx.fillStyle = '#0284c7';
+    ctx.beginPath();
+    ctx.arc(badgeX, badgeY, badgeR, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.strokeStyle = '#ffffff';
+    ctx.lineWidth = 7;
+    ctx.stroke();
+
+    // Plus symbol
+    ctx.strokeStyle = '#ffffff';
+    ctx.lineWidth = 7;
+    ctx.lineCap = 'round';
+    const plusSize = badgeR * 0.50;
+    ctx.beginPath();
+    ctx.moveTo(badgeX - plusSize, badgeY);
+    ctx.lineTo(badgeX + plusSize, badgeY);
+    ctx.moveTo(badgeX, badgeY - plusSize);
+    ctx.lineTo(badgeX, badgeY + plusSize);
+    ctx.stroke();
+
     ctx.restore();
 
-    // Text Section
+    // Minimalist, high-contrast action text (significantly enlarged for readability)
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
 
-    // 1. Headline: "ẢNH CHẠY BỘ CỦA BẠN"
-    const titleSize = isCompact ? 54 : isEqualRatio ? 68 : 78;
-    ctx.font = `800 ${titleSize}px 'Montserrat', sans-serif`;
-    ctx.fillStyle = '#0f172a';
-    const titleY = cardY + cardH * 0.50;
-    ctx.fillText('ẢNH CHẠY BỘ CỦA BẠN', centerX, titleY);
-
-    // 2. Action Pill Button Graphic: "BẤM ĐỂ CHỌN ẢNH CÁ NHÂN"
-    const btnW = Math.min(cardW * 0.82, isCompact ? 680 : 920);
-    const btnH = isCompact ? 96 : 114;
-    const btnY = cardY + cardH * 0.64;
+    // 1. Primary Action Pill Button: "THÊM ẢNH CỦA BẠN"
+    const btnW = Math.min(cardW * 0.88, isCompact ? 800 : 1060);
+    const btnH = isCompact ? 150 : 176;
+    const btnY = cardY + cardH * 0.59;
     const btnX = centerX - btnW / 2;
 
     ctx.save();
+    // Subtle shadow for button
+    ctx.shadowColor = 'rgba(2, 132, 199, 0.28)';
+    ctx.shadowBlur = 28;
+    ctx.shadowOffsetY = 10;
+
     const btnGrad = ctx.createLinearGradient(btnX, btnY, btnX + btnW, btnY);
     btnGrad.addColorStop(0, '#0369a1');
     btnGrad.addColorStop(1, '#0284c7');
     ctx.fillStyle = btnGrad;
     roundRect(ctx, btnX, btnY, btnW, btnH, btnH / 2);
     ctx.fill();
-
-    const btnFontSize = isCompact ? 36 : isEqualRatio ? 44 : 50;
-    ctx.font = `700 ${btnFontSize}px 'Montserrat', sans-serif`;
-    ctx.fillStyle = '#ffffff';
-    ctx.fillText('BẤM ĐỂ CHỌN ẢNH CÁ NHÂN', centerX, btnY + btnH / 2);
     ctx.restore();
 
-    // 3. Secondary drag & drop hint
-    const subFontSize = isCompact ? 32 : isEqualRatio ? 40 : 46;
-    ctx.font = `600 ${subFontSize}px 'Plus Jakarta Sans', sans-serif`;
-    ctx.fillStyle = '#475569';
-    const subY = cardY + cardH * 0.82;
-    ctx.fillText('hoặc kéo & thả ảnh trực tiếp vào khung này', centerX, subY);
+    const btnFontSize = isCompact ? 64 : isEqualRatio ? 76 : 82;
+    ctx.font = `800 ${btnFontSize}px 'Montserrat', sans-serif`;
+    ctx.fillStyle = '#ffffff';
+    ctx.fillText('THÊM ẢNH CỦA BẠN', centerX, btnY + btnH / 2);
 
-    // 4. Subtle file format note
-    const noteFontSize = isCompact ? 26 : isEqualRatio ? 32 : 36;
-    ctx.font = `500 ${noteFontSize}px 'Plus Jakarta Sans', sans-serif`;
-    ctx.fillStyle = '#94a3b8';
-    const noteY = cardY + cardH * 0.91;
-    ctx.fillText('Hỗ trợ ảnh JPG, PNG, WEBP • Tự động căn chỉnh vừa vặn', centerX, noteY);
+    // 2. Clear, high-contrast subtext: "Chạm hoặc kéo thả ảnh vào đây"
+    const subFontSize = isCompact ? 52 : isEqualRatio ? 60 : 66;
+    ctx.font = `700 ${subFontSize}px 'Plus Jakarta Sans', sans-serif`;
+    ctx.fillStyle = '#0f172a';
+    const subY = btnY + btnH + (isCompact ? 80 : 100);
+    ctx.fillText('Chạm hoặc kéo thả ảnh vào đây', centerX, subY);
   }
 
   ctx.restore();
@@ -848,12 +866,12 @@ export const drawSquareSocialFrame = async (options: DrawSquareFrameOptions): Pr
     // Guidance text
     ctx.textAlign = 'center';
     ctx.fillStyle = '#FFFFFF';
-    ctx.font = `700 ${Math.round(size * 0.024)}px 'Montserrat', sans-serif`;
-    ctx.fillText('ẢNH CHẠY BỘ CỦA BẠN', photoX + halfWidth / 2, size * 0.63);
+    ctx.font = `700 ${Math.round(size * 0.026)}px 'Montserrat', sans-serif`;
+    ctx.fillText('THÊM ẢNH CỦA BẠN', photoX + halfWidth / 2, size * 0.63);
 
-    ctx.fillStyle = '#38bdf8';
-    ctx.font = `600 ${Math.round(size * 0.016)}px 'Montserrat', sans-serif`;
-    ctx.fillText('Nhấp vào "Chọn ảnh cá nhân" hoặc Kéo thả ảnh vào đây', photoX + halfWidth / 2, size * 0.67);
+    ctx.fillStyle = '#bae6fd';
+    ctx.font = `600 ${Math.round(size * 0.018)}px 'Plus Jakarta Sans', sans-serif`;
+    ctx.fillText('Chạm hoặc kéo thả ảnh vào đây', photoX + halfWidth / 2, size * 0.68);
   }
 
   // 3. Optional Overlay Badge on the Photo

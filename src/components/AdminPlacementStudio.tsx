@@ -73,7 +73,7 @@ export const AdminPlacementStudio: React.FC<AdminPlacementStudioProps> = ({
   const [placements, setPlacements] = useState<CertificatePlacements>(() => getSavedPlacements());
   const [activeFieldId, setActiveFieldId] = useState<string>('name');
   const [showGuide, setShowGuide] = useState<boolean>(true);
-  const [selectedRunner, setSelectedRunner] = useState<Runner>(runners[0] || {
+  const [selectedRunner, setSelectedRunner] = useState<Runner>((runners && runners.length > 0 && runners[0]) || {
     bib: '90110',
     name: 'PHÙNG HỮU THANH',
     gender: 'M',

@@ -1,4 +1,4 @@
-import { Race, RACES, DEFAULT_RACE } from './races';
+import { Race, RACES, DEFAULT_RACE, ensureRaceRunners } from './races';
 import { CertificatePlacements } from '../types';
 
 const STORAGE_KEY_RACES = 'vm_custom_races_list_v1';
@@ -20,29 +20,19 @@ export interface CreateRacePayload {
  * Lấy danh sách toàn bộ các giải đấu từ localStorage và static config
  */
 export function getLocalRaces(): Race[] {
-  if (typeof window === 'undefined') return RACES;
+  if (typeof window === 'undefined') return RACES.map(ensureRaceRunners);
   try {
     const raw = localStorage.getItem(STORAGE_KEY_RACES);
     if (raw) {
       const parsed: Race[] = JSON.parse(raw);
       if (Array.isArray(parsed) && parsed.length > 0) {
-        // Gộp với RACES mặc định (không để trùng id/slug)
-        const combined = [...RACES];
-        for (const r of parsed) {
-          const idx = combined.findIndex((item) => item.id === r.id || item.slug === r.slug);
-          if (idx >= 0) {
-            combined[idx] = { ...combined[idx], ...r };
-          } else {
-            combined.push(r);
-          }
-        }
-        return combined;
+        return parsed.map(ensureRaceRunners);
       }
     }
   } catch (err) {
     console.warn('Lỗi đọc danh sách giải từ localStorage:', err);
   }
-  return RACES;
+  return RACES.map(ensureRaceRunners);
 }
 
 /**
@@ -54,11 +44,12 @@ export async function fetchAllRaces(): Promise<Race[]> {
     if (resp.ok) {
       const data: Race[] = await resp.json();
       if (Array.isArray(data) && data.length > 0) {
+        const fullRaces = data.map(ensureRaceRunners);
         // Đồng bộ vào localStorage
         if (typeof window !== 'undefined') {
-          localStorage.setItem(STORAGE_KEY_RACES, JSON.stringify(data));
+          localStorage.setItem(STORAGE_KEY_RACES, JSON.stringify(fullRaces));
         }
-        return data;
+        return fullRaces;
       }
     }
   } catch (err) {
@@ -71,7 +62,7 @@ export async function fetchAllRaces(): Promise<Race[]> {
  * Phân giải giải đấu dựa trên đường dẫn URL (pathname, hash, query)
  */
 export function resolveRaceFromPath(pathStr: string, raceList: Race[] = getLocalRaces()): Race {
-  if (!pathStr) return raceList[0] || DEFAULT_RACE;
+  if (!pathStr) return ensureRaceRunners(raceList[0] || DEFAULT_RACE);
 
   const clean = pathStr.toLowerCase();
 
@@ -79,24 +70,24 @@ export function resolveRaceFromPath(pathStr: string, raceList: Race[] = getLocal
   const queryMatch = clean.match(/[?&]race=([a-z0-9_-]+)/);
   if (queryMatch && queryMatch[1]) {
     const found = raceList.find((r) => r.slug.toLowerCase() === queryMatch[1] || r.id.toLowerCase() === queryMatch[1]);
-    if (found) return found;
+    if (found) return ensureRaceRunners(found);
   }
 
   // Kiểm tra hash #slug
   const hashMatch = clean.match(/#([a-z0-9_-]+)/);
   if (hashMatch && hashMatch[1] && hashMatch[1] !== 'admin') {
     const found = raceList.find((r) => r.slug.toLowerCase() === hashMatch[1] || r.id.toLowerCase() === hashMatch[1]);
-    if (found) return found;
+    if (found) return ensureRaceRunners(found);
   }
 
   // Kiểm tra pathname /ha-long-2026 hoặc /vm-ha-long-2026
   const pathname = clean.split('?')[0].split('#')[0].replace(/^\/+|\/+$/g, '');
   if (pathname && pathname !== 'admin') {
     const found = raceList.find((r) => r.slug.toLowerCase() === pathname || r.id.toLowerCase() === pathname);
-    if (found) return found;
+    if (found) return ensureRaceRunners(found);
   }
 
-  return raceList[0] || DEFAULT_RACE;
+  return ensureRaceRunners(raceList[0] || DEFAULT_RACE);
 }
 
 /**

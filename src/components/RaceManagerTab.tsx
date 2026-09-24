@@ -2,6 +2,7 @@ import React, { useState, useRef } from 'react';
 import { Race } from '../data/races';
 import { CertificatePlacements } from '../types';
 import { exportRaceToExcel, importRaceFromExcel } from '../utils/exportRaceExcel';
+import { exportRaceStaticApi, importRaceFromStaticApi } from '../utils/exportRaceStaticApi';
 import { DEFAULT_NGHE_AN_PLACEMENTS } from '../data/certificatePlacements';
 import { testScriptConnection } from '../data/raceStorage';
 import {
@@ -11,6 +12,8 @@ import {
   Copy,
   Check,
   FileSpreadsheet,
+  FileCode,
+  FolderSync,
   Edit2,
   Trash2,
   Upload,
@@ -72,9 +75,13 @@ export const RaceManagerTab: React.FC<RaceManagerTabProps> = ({
   const [formError, setFormError] = useState<string | null>(null);
   const [copiedSlug, setCopiedSlug] = useState<string | null>(null);
 
-  // Excel File Input Ref for Import
+  // Excel & JSON File Input Refs for Import
   const excelFileInputRef = useRef<HTMLInputElement>(null);
   const [isImportingExcel, setIsImportingExcel] = useState(false);
+  const jsonFileInputRef = useRef<HTMLInputElement>(null);
+  const [isImportingJson, setIsImportingJson] = useState(false);
+  const [isScanningFolder, setIsScanningFolder] = useState(false);
+  const [folderScanMsg, setFolderScanMsg] = useState<string | null>(null);
 
   // Script Connection Testing
   const [isTestingScript, setIsTestingScript] = useState(false);
@@ -166,6 +173,74 @@ export const RaceManagerTab: React.FC<RaceManagerTabProps> = ({
       setIsImportingExcel(false);
       // Reset input value so same file can be selected again
       e.target.value = '';
+    }
+  };
+
+  // Import from Static API JSON file (.json)
+  const handleImportJsonFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setIsImportingJson(true);
+    try {
+      const { raceInfo, placements: importedPlacements } = await importRaceFromStaticApi(file);
+
+      // Thử lưu trực tiếp vào backend API và ghi file public/races/${slug}.json
+      try {
+        const resp = await fetch('/api/admin/import-static-race', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            password: '0966559155',
+            raceData: { ...raceInfo, placements: importedPlacements },
+          }),
+        });
+        if (resp.ok) {
+          const resData = await resp.json();
+          await onRefreshRaces();
+          setFolderScanMsg(`✅ ${resData.message || `Đã nạp thành công giải "${raceInfo.name}"!`}`);
+          setTimeout(() => setFolderScanMsg(null), 6000);
+          return;
+        }
+      } catch {}
+
+      // Fallback: đổ dữ liệu vào form để người dùng xem và bấm Lưu
+      setEditingRace(null);
+      if (raceInfo.name) setFormName(raceInfo.name);
+      if (raceInfo.slug) setFormSlug(raceInfo.slug);
+      if (raceInfo.code) setFormCode(raceInfo.code);
+      if (raceInfo.defaultBgUrl) setFormBgUrl(raceInfo.defaultBgUrl);
+      if (raceInfo.appsScriptUrl) setFormScriptUrl(raceInfo.appsScriptUrl);
+      if (raceInfo.date) setFormDate(raceInfo.date);
+      if (raceInfo.locationFull) setFormLocation(raceInfo.locationFull);
+      if (importedPlacements && Object.keys(importedPlacements).length > 0) {
+        setFormPlacements(importedPlacements);
+      }
+
+      setFormError(null);
+      setSaveSuccessMsg(
+        'Đã đọc thành công thông số giải và toạ độ phôi từ file API tĩnh (.json)! Vui lòng bấm "Lưu & Khởi Tạo Giải".'
+      );
+      setIsModalOpen(true);
+    } catch (err: any) {
+      alert(err.message || 'Lỗi khi nhập file JSON');
+    } finally {
+      setIsImportingJson(false);
+      e.target.value = '';
+    }
+  };
+
+  // Quét lại thư mục public/races/ để nhận giải mới ném vào code
+  const handleScanRacesFolder = async () => {
+    setIsScanningFolder(true);
+    try {
+      await onRefreshRaces();
+      setFolderScanMsg('Đã quét lại thư mục public/races/ và đồng bộ toàn bộ giải đấu vào hệ thống!');
+      setTimeout(() => setFolderScanMsg(null), 5000);
+    } catch (err: any) {
+      alert('Lỗi quét thư mục: ' + (err.message || 'Không thể kết nối'));
+    } finally {
+      setIsScanningFolder(false);
     }
   };
 
@@ -316,8 +391,24 @@ export const RaceManagerTab: React.FC<RaceManagerTabProps> = ({
 
   return (
     <div className="space-y-6">
-      {/* Top Banner & Action */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-stone-850 p-5 rounded-2xl border border-stone-800 shadow-md">
+      {/* Hidden File Inputs for Import */}
+      <input
+        ref={excelFileInputRef}
+        type="file"
+        accept=".xlsx,.xls"
+        onChange={handleImportExcelFile}
+        className="hidden"
+      />
+      <input
+        ref={jsonFileInputRef}
+        type="file"
+        accept=".json"
+        onChange={handleImportJsonFile}
+        className="hidden"
+      />
+
+      {/* Top Banner & Actions */}
+      <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4 bg-stone-850 p-5 rounded-2xl border border-stone-800 shadow-md">
         <div>
           <div className="flex items-center gap-2 mb-1">
             <Trophy className="w-5 h-5 text-amber-400" />
@@ -331,14 +422,87 @@ export const RaceManagerTab: React.FC<RaceManagerTabProps> = ({
           </p>
         </div>
 
-        <button
-          type="button"
-          onClick={handleOpenCreateModal}
-          className="px-4 py-2.5 bg-teal-600 hover:bg-teal-500 text-white font-bold rounded-xl shadow-md flex items-center gap-2 transition-all cursor-pointer hover:scale-[1.02] active:scale-95 shrink-0 text-xs"
-        >
-          <Plus className="w-4 h-4" />
-          <span>Tạo Giải Mới</span>
-        </button>
+        <div className="flex items-center gap-2 flex-wrap w-full lg:w-auto">
+          {/* Scan folder button */}
+          <button
+            type="button"
+            onClick={handleScanRacesFolder}
+            disabled={isScanningFolder}
+            className="px-3 py-2 bg-stone-800 hover:bg-stone-750 border border-stone-700 text-stone-200 font-medium rounded-xl text-xs flex items-center gap-1.5 transition-colors cursor-pointer disabled:opacity-50"
+            title="Quét lại thư mục public/races/ để tự động nhận các file .json mới được thêm vào code"
+          >
+            <FolderSync className={`w-3.5 h-3.5 text-sky-400 ${isScanningFolder ? 'animate-spin' : ''}`} />
+            <span>{isScanningFolder ? 'Đang quét...' : 'Quét public/races/'}</span>
+          </button>
+
+          {/* Import JSON button */}
+          <button
+            type="button"
+            onClick={() => jsonFileInputRef.current?.click()}
+            disabled={isImportingJson}
+            className="px-3 py-2 bg-sky-950/70 hover:bg-sky-900/90 border border-sky-700/80 text-sky-300 font-semibold rounded-xl text-xs flex items-center gap-1.5 transition-colors cursor-pointer disabled:opacity-50"
+            title="Nạp cấu hình giải từ file API tĩnh (.json)"
+          >
+            <FileCode className="w-3.5 h-3.5 text-sky-400" />
+            <span>{isImportingJson ? 'Đang đọc...' : 'Nhập File API (.json)'}</span>
+          </button>
+
+          {/* Import Excel button */}
+          <button
+            type="button"
+            onClick={() => excelFileInputRef.current?.click()}
+            disabled={isImportingExcel}
+            className="px-3 py-2 bg-emerald-950/70 hover:bg-emerald-900/90 border border-emerald-700/80 text-emerald-300 font-semibold rounded-xl text-xs flex items-center gap-1.5 transition-colors cursor-pointer disabled:opacity-50"
+            title="Nạp cấu hình giải từ file Excel (.xlsx)"
+          >
+            <FileSpreadsheet className="w-3.5 h-3.5 text-emerald-400" />
+            <span>{isImportingExcel ? 'Đang đọc...' : 'Nhập Excel'}</span>
+          </button>
+
+          {/* Create race */}
+          <button
+            type="button"
+            onClick={handleOpenCreateModal}
+            className="px-4 py-2 bg-teal-600 hover:bg-teal-500 text-white font-bold rounded-xl shadow-md flex items-center gap-2 transition-all cursor-pointer hover:scale-[1.02] active:scale-95 text-xs"
+          >
+            <Plus className="w-4 h-4" />
+            <span>Tạo Giải Mới</span>
+          </button>
+        </div>
+      </div>
+
+      {/* Folder Scan Notification Toast */}
+      {folderScanMsg && (
+        <div className="p-3.5 bg-sky-950/60 border border-sky-600/80 rounded-2xl flex items-center justify-between gap-3 text-xs text-sky-200 shadow-md animate-fadeIn">
+          <div className="flex items-center gap-2.5 font-medium">
+            <CheckCircle2 className="w-4 h-4 text-sky-400 shrink-0" />
+            <span>{folderScanMsg}</span>
+          </div>
+          <button
+            type="button"
+            onClick={() => setFolderScanMsg(null)}
+            className="text-stone-400 hover:text-white p-1"
+          >
+            <X className="w-3.5 h-3.5" />
+          </button>
+        </div>
+      )}
+
+      {/* Guide Banner for Static Races Folder in Code */}
+      <div className="bg-gradient-to-r from-sky-950/40 via-stone-900 to-teal-950/40 border border-sky-800/40 rounded-2xl p-4 text-xs text-stone-300 space-y-2.5 shadow-sm">
+        <div className="flex items-center justify-between flex-wrap gap-2">
+          <div className="flex items-center gap-2 font-bold text-sky-300">
+            <Code2 className="w-4 h-4 text-sky-400" />
+            <span>Cơ chế ném file API tĩnh vào source code để tự động sinh giải mới</span>
+          </div>
+          <div className="flex items-center gap-2 font-mono text-[11px] bg-stone-950/80 border border-stone-800 px-2.5 py-1 rounded-lg text-amber-300">
+            <span>📁 Thư mục code:</span>
+            <code className="text-teal-400 font-bold">/public/races/</code>
+          </div>
+        </div>
+        <p className="text-stone-400 leading-relaxed text-[11px]">
+          Tại mỗi giải đấu bên dưới, bạn có thể bấm <strong>"Xuất API Tĩnh (.json)"</strong> (hoặc <strong>"Xuất Excel"</strong>) để tải về file cấu hình đầy đủ toạ độ phôi và thông số giải. Sau đó, ném file này vào thư mục <code className="px-1.5 py-0.5 bg-stone-950 text-sky-300 rounded font-mono border border-stone-800">public/races/</code> (ví dụ: <code className="px-1.5 py-0.5 bg-stone-950 text-amber-300 rounded font-mono border border-stone-800">public/races/ha-long-2026.json</code>). Hệ thống sẽ tự động quét thư mục này và khởi tạo giải chạy mới với đầy đủ thông số và toạ độ phôi chuẩn xác!
+        </p>
       </div>
 
       {/* Races Grid */}
@@ -472,39 +636,59 @@ export const RaceManagerTab: React.FC<RaceManagerTabProps> = ({
                     </button>
                   </div>
 
-                  <div className="flex items-center justify-between gap-2">
-                    {/* Export Excel Button (Yêu cầu 2 của người dùng) */}
+                  <div className="grid grid-cols-2 gap-2">
+                    {/* Export Excel (.xlsx) */}
                     <button
                       type="button"
                       onClick={() => exportRaceToExcel(race, race.placements || currentPlacements)}
-                      className="flex-1 px-2.5 py-1.5 rounded-lg bg-emerald-950/70 hover:bg-emerald-900/90 border border-emerald-700/80 text-emerald-300 font-semibold flex items-center justify-center gap-1.5 transition-colors cursor-pointer text-[11px]"
-                      title="Xuất file cấu hình Excel (.xlsx) chứa toàn bộ thiết lập giải và toạ độ text"
+                      className="px-2.5 py-1.5 rounded-lg bg-emerald-950/70 hover:bg-emerald-900/90 border border-emerald-700/80 text-emerald-300 font-semibold flex items-center justify-center gap-1.5 transition-colors cursor-pointer text-[11px]"
+                      title="Xuất file cấu hình Excel (.xlsx) kèm file API tĩnh"
                     >
-                      <FileSpreadsheet className="w-3.5 h-3.5 text-emerald-400" />
-                      <span>Xuất Excel (.xlsx)</span>
+                      <FileSpreadsheet className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+                      <span className="truncate">Xuất Excel</span>
                     </button>
 
-                    {/* Edit */}
+                    {/* Export Static API JSON (.json) */}
                     <button
                       type="button"
-                      onClick={() => handleOpenEditModal(race)}
-                      className="p-1.5 rounded-lg bg-stone-800 hover:bg-stone-700 text-stone-300 hover:text-white transition-colors cursor-pointer"
-                      title="Chỉnh sửa giải đấu"
+                      onClick={() => exportRaceStaticApi(race, race.placements || currentPlacements)}
+                      className="px-2.5 py-1.5 rounded-lg bg-sky-950/70 hover:bg-sky-900/90 border border-sky-700/80 text-sky-300 font-semibold flex items-center justify-center gap-1.5 transition-colors cursor-pointer text-[11px]"
+                      title="Xuất file API tĩnh (.json) để ném vào thư mục public/races/ sinh giải mới tự động"
                     >
-                      <Edit2 className="w-3.5 h-3.5" />
+                      <FileCode className="w-3.5 h-3.5 text-sky-400 shrink-0" />
+                      <span className="truncate">Xuất API Tĩnh</span>
                     </button>
+                  </div>
 
-                    {/* Delete (if not default) */}
-                    {race.id !== 'nghe-an-2026' && (
+                  <div className="flex items-center justify-between gap-2 pt-1 border-t border-stone-800/60">
+                    <span className="text-[10px] text-stone-500 font-mono truncate">
+                      public/races/{race.slug}.json
+                    </span>
+
+                    <div className="flex items-center gap-1.5">
+                      {/* Edit */}
                       <button
                         type="button"
-                        onClick={() => handleDeleteRace(race)}
-                        className="p-1.5 rounded-lg bg-red-950/50 hover:bg-red-900/80 text-red-400 hover:text-red-200 transition-colors cursor-pointer"
-                        title="Xoá giải đấu"
+                        onClick={() => handleOpenEditModal(race)}
+                        className="px-2 py-1 rounded-lg bg-stone-800 hover:bg-stone-700 text-stone-300 hover:text-white transition-colors cursor-pointer text-[11px] flex items-center gap-1"
+                        title="Chỉnh sửa giải đấu"
                       >
-                        <Trash2 className="w-3.5 h-3.5" />
+                        <Edit2 className="w-3 h-3" />
+                        <span>Sửa</span>
                       </button>
-                    )}
+
+                      {/* Delete (if not default) */}
+                      {race.id !== 'nghe-an-2026' && (
+                        <button
+                          type="button"
+                          onClick={() => handleDeleteRace(race)}
+                          className="p-1 rounded-lg bg-red-950/50 hover:bg-red-900/80 text-red-400 hover:text-red-200 transition-colors cursor-pointer"
+                          title="Xoá giải đấu"
+                        >
+                          <Trash2 className="w-3 h-3" />
+                        </button>
+                      )}
+                    </div>
                   </div>
                 </div>
               </div>
@@ -549,20 +733,32 @@ export const RaceManagerTab: React.FC<RaceManagerTabProps> = ({
                 </div>
                 <div className="flex items-center gap-2 pt-1 flex-wrap">
                   {savedRaceForExport && (
-                    <button
-                      type="button"
-                      onClick={() => exportRaceToExcel(savedRaceForExport, currentPlacements)}
-                      className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-lg text-xs flex items-center gap-1.5 shadow-xs cursor-pointer"
-                    >
-                      <FileSpreadsheet className="w-3.5 h-3.5" />
-                      <span>Xuất File Excel Cấu Hình (.xlsx)</span>
-                    </button>
+                    <>
+                      <button
+                        type="button"
+                        onClick={() => exportRaceToExcel(savedRaceForExport, currentPlacements)}
+                        className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-lg text-xs flex items-center gap-1.5 shadow-xs cursor-pointer"
+                      >
+                        <FileSpreadsheet className="w-3.5 h-3.5" />
+                        <span>Xuất File Excel (.xlsx)</span>
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => exportRaceStaticApi(savedRaceForExport, currentPlacements)}
+                        className="px-3 py-1.5 bg-sky-600 hover:bg-sky-500 text-white font-bold rounded-lg text-xs flex items-center gap-1.5 shadow-xs cursor-pointer"
+                        title="Tải file API tĩnh (.json) để ném vào public/races/"
+                      >
+                        <FileCode className="w-3.5 h-3.5" />
+                        <span>Xuất File API Tĩnh (.json)</span>
+                      </button>
+                    </>
                   )}
                   {savedRaceForExport && (
                     <button
                       type="button"
                       onClick={() => onNavigateToRace(savedRaceForExport.slug)}
-                      className="px-3 py-1.5 bg-stone-800 hover:bg-stone-700 text-stone-200 font-medium rounded-lg text-xs flex items-center gap-1.5 cursor-pointer"
+                      className="px-3 py-1.5 bg-stone-800 hover:bg-stone-750 text-stone-200 font-medium rounded-lg text-xs flex items-center gap-1.5 cursor-pointer"
                     >
                       <ExternalLink className="w-3.5 h-3.5" />
                       <span>Xem trang giải ngay</span>

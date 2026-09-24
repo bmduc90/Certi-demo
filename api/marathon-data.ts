@@ -2,7 +2,7 @@
 const MARATHON_SECRET_KEY = process.env.MARATHON_SECRET_KEY || 'ducbm900966559155';
 const MARATHON_APPS_SCRIPT_URL =
   process.env.MARATHON_APPS_SCRIPT_URL ||
-  'https://script.google.com/macros/s/AKfycbwvqwP__bXjxWG8WgH_Qjy8ypBztY8P2bAaQDdLvVckyA-KQtoJ7Hyzk8E-6WpTlrR1/exec';
+  'https://script.google.com/macros/s/AKfycbwwY2MgGaURMrB20UHGVvUZ3INSOrkd8jIQok1JpnDTWMzblecdDOdDTn7qtrbtPPzquw/exec';
 
 function parseTSVData(tsvText: string): any[] {
   const lines = tsvText.split(/\r?\n/).filter((l) => l.trim().length > 0);

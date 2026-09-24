@@ -2,6 +2,7 @@ import * as XLSX from 'xlsx';
 import { Race } from '../data/races';
 import { CertificatePlacements, CertificateFieldPlacement } from '../types';
 import { DEFAULT_NGHE_AN_PLACEMENTS, getSavedPlacements } from '../data/certificatePlacements';
+import { exportRaceStaticApi } from './exportRaceStaticApi';
 
 const SAMPLE_VALUES: Record<string, string> = {
   name: 'PHÙNG HỮU THANH',
@@ -28,7 +29,11 @@ const FIELD_NOTES: Record<string, string> = {
 /**
  * Xuất toàn bộ cấu hình giải đấu VÀ cấu hình chỉnh phôi ra file Excel (.xlsx)
  */
-export function exportRaceToExcel(race: Race, placements?: CertificatePlacements) {
+export function exportRaceToExcel(
+  race: Race,
+  placements?: CertificatePlacements,
+  alsoExportJson: boolean = true
+) {
   const wb = XLSX.utils.book_new();
 
   const baseUrl = typeof window !== 'undefined' ? window.location.origin : '';
@@ -175,6 +180,17 @@ export function exportRaceToExcel(race: Race, placements?: CertificatePlacements
   const fileName = `Cau_Hinh_Chinh_Phoi_${cleanSlug}_${nowStr}.xlsx`;
 
   XLSX.writeFile(wb, fileName);
+
+  // Tự động xuất file API tĩnh (.json) để ném vào thư mục public/races/ sinh giải mới
+  if (alsoExportJson) {
+    setTimeout(() => {
+      try {
+        exportRaceStaticApi(race, activePlacements);
+      } catch (err) {
+        console.warn('Lỗi xuất file API tĩnh kèm theo:', err);
+      }
+    }, 250);
+  }
 }
 
 /**
