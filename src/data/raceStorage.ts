@@ -9,6 +9,7 @@ export interface CreateRacePayload {
   code?: string;
   defaultBgUrl: string;
   appsScriptUrl?: string;
+  photosScriptUrl?: string;
   city?: string;
   province?: string;
   date?: string;

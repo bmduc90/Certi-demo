@@ -13,6 +13,7 @@ export interface Runner {
   pace?: string;
   date?: string; // default '13/09/2026'
   photoUrl?: string; // Optional runner photo URL
+  racePhotos?: string[]; // Danh sách link ảnh thi đấu theo số BIB từ Google Sheet (Cột BIB & IMG)
 
   // Checkpoint parameters & paces requested
   startTime?: string;

@@ -25,7 +25,9 @@ import {
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { Runner, CertificateConfig } from '../types';
+import { Race } from '../data/races';
 import { DEMO_PHOTOS } from '../data/mockRunners';
+import { RacePhotosSelector } from './RacePhotosSelector';
 import { drawCertificate, drawCollageFrame, PhotoFilters } from '../utils/canvasDrawer';
 import { PlacementEditorPanel } from './PlacementEditorPanel';
 import {
@@ -61,6 +63,7 @@ interface CertificateCanvasProps {
   raceName?: string;
   defaultBgUrl?: string;
   raceId?: string;
+  activeRace?: Race;
   showAdminPlacementTool?: boolean;
 }
 
@@ -71,6 +74,7 @@ export const CertificateCanvas: React.FC<CertificateCanvasProps> = ({
   raceName,
   defaultBgUrl,
   raceId,
+  activeRace,
   showAdminPlacementTool = false,
 }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -271,15 +275,35 @@ export const CertificateCanvas: React.FC<CertificateCanvasProps> = ({
     if (personalPhotoUrl) {
       const pImg = new Image();
       pImg.crossOrigin = 'anonymous';
-      pImg.src = personalPhotoUrl;
+
+      // Use proxy if needed or direct
+      const srcUrl = personalPhotoUrl.startsWith('http://') || personalPhotoUrl.startsWith('https://')
+        ? `/api/proxy-image?url=${encodeURIComponent(personalPhotoUrl)}`
+        : personalPhotoUrl;
+
+      pImg.src = srcUrl;
       pImg.onload = () => {
         personalImgRef.current = pImg;
         setImagesReady((prev) => !prev);
       };
       pImg.onerror = () => {
-        // In case external URL is blocked, continue gracefully
-        personalImgRef.current = null;
-        setImagesReady((prev) => !prev);
+        // Fallback to direct URL if proxy failed
+        if (srcUrl !== personalPhotoUrl) {
+          const directImg = new Image();
+          directImg.crossOrigin = 'anonymous';
+          directImg.src = personalPhotoUrl;
+          directImg.onload = () => {
+            personalImgRef.current = directImg;
+            setImagesReady((prev) => !prev);
+          };
+          directImg.onerror = () => {
+            personalImgRef.current = null;
+            setImagesReady((prev) => !prev);
+          };
+        } else {
+          personalImgRef.current = null;
+          setImagesReady((prev) => !prev);
+        }
       };
     } else {
       personalImgRef.current = null;
@@ -848,6 +872,24 @@ export const CertificateCanvas: React.FC<CertificateCanvasProps> = ({
           </button>
         </div>
       </div>
+
+      {/* Race Photos Gallery (BIB Mapping from Google Sheet / Data) */}
+      <RacePhotosSelector
+        runner={runner}
+        activePhotoUrl={personalPhotoUrl}
+        activeRace={activeRace}
+        onSelectPhoto={(url) => {
+          setPersonalPhotoUrl(url);
+          setUserUploadedPhoto(url);
+          if (viewMode !== 'collage') {
+            setViewMode('collage');
+          }
+          setPhotoOffsetX(0);
+          setPhotoOffsetY(0);
+          setPhotoZoom(1.0);
+        }}
+        onUploadCustomPhoto={() => personalFileInputRef.current?.click()}
+      />
 
       {/* Collage Control Panel (Only visible in collage mode) */}
       {viewMode === 'collage' && (

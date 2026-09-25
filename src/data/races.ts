@@ -21,7 +21,9 @@ export interface Race {
   initialRunners?: Runner[];
   demoRunners?: Runner[];
   demoPhotos?: Record<string, string>;
+  demoRacePhotos?: Record<string, string[]>; // Mảng nhiều ảnh thi đấu cho mỗi BIB
   appsScriptUrl?: string;
+  photosScriptUrl?: string; // Link Google Apps Script Web App lấy dữ liệu ảnh từ Google Sheet (Cột BIB & IMG)
   description: string;
   placements?: CertificatePlacements;
 }
@@ -82,6 +84,8 @@ export const RACES: Race[] = [
     demoPhotos: DEMO_PHOTOS,
     appsScriptUrl:
       'https://script.google.com/macros/s/AKfycbwwY2MgGaURMrB20UHGVvUZ3INSOrkd8jIQok1JpnDTWMzblecdDOdDTn7qtrbtPPzquw/exec?key=ducbm900966559155',
+    photosScriptUrl:
+      'https://script.google.com/macros/s/AKfycbyUr1QYj9Eyp60HaDLhXJINbr8Yozt3TXMRlPHpJ7QWhpkK6D4D_ZGMhW5dUerljLT3/exec',
     description: 'Tra cứu kết quả & Chứng nhận điện tử VnExpress Marathon Grand Tour Nghe An 2026',
   },
 ];

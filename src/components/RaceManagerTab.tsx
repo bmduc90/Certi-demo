@@ -5,6 +5,7 @@ import { exportRaceToExcel, importRaceFromExcel } from '../utils/exportRaceExcel
 import { exportRaceStaticApi, importRaceFromStaticApi } from '../utils/exportRaceStaticApi';
 import { DEFAULT_NGHE_AN_PLACEMENTS } from '../data/certificatePlacements';
 import { testScriptConnection } from '../data/raceStorage';
+import { GOOGLE_APPS_SCRIPT_PHOTOS_CODE } from '../services/racePhotoService';
 import {
   Plus,
   Trophy,
@@ -61,12 +62,23 @@ export const RaceManagerTab: React.FC<RaceManagerTabProps> = ({
   const [formBgUrl, setFormBgUrl] = useState('/NA26.png');
   const [formBgDataUrl, setFormBgDataUrl] = useState<string | null>(null);
   const [formScriptUrl, setFormScriptUrl] = useState('');
+  const [formPhotosScriptUrl, setFormPhotosScriptUrl] = useState('');
   const [formDate, setFormDate] = useState('2026');
   const [formLocation, setFormLocation] = useState('');
   const [formPlacements, setFormPlacements] = useState<CertificatePlacements>(
     () => currentPlacements || DEFAULT_NGHE_AN_PLACEMENTS
   );
   const [showPlacementsSection, setShowPlacementsSection] = useState(true);
+
+  // Modal for Viewing Google Apps Script Code for Photos
+  const [showScriptModal, setShowScriptModal] = useState(false);
+  const [copiedScript, setCopiedScript] = useState(false);
+  const [isTestingPhotosScript, setIsTestingPhotosScript] = useState(false);
+  const [photosScriptTestResult, setPhotosScriptTestResult] = useState<{
+    success: boolean;
+    count?: number;
+    message: string;
+  } | null>(null);
 
   // Status & Feedback State
   const [isSaving, setIsSaving] = useState(false);
@@ -113,6 +125,7 @@ export const RaceManagerTab: React.FC<RaceManagerTabProps> = ({
     setFormBgUrl('/NA26.png');
     setFormBgDataUrl(null);
     setFormScriptUrl('');
+    setFormPhotosScriptUrl('');
     setFormDate('2026');
     setFormLocation('');
     setFormPlacements(currentPlacements || DEFAULT_NGHE_AN_PLACEMENTS);
@@ -120,6 +133,7 @@ export const RaceManagerTab: React.FC<RaceManagerTabProps> = ({
     setSaveSuccessMsg(null);
     setSavedRaceForExport(null);
     setScriptTestResult(null);
+    setPhotosScriptTestResult(null);
     setIsModalOpen(true);
   };
 
@@ -131,6 +145,7 @@ export const RaceManagerTab: React.FC<RaceManagerTabProps> = ({
     setFormBgUrl(race.defaultBgUrl || '/NA26.png');
     setFormBgDataUrl(null);
     setFormScriptUrl(race.appsScriptUrl || '');
+    setFormPhotosScriptUrl(race.photosScriptUrl || '');
     setFormDate(race.date || '2026');
     setFormLocation(race.locationFull || '');
     setFormPlacements(race.placements || currentPlacements || DEFAULT_NGHE_AN_PLACEMENTS);
@@ -138,6 +153,7 @@ export const RaceManagerTab: React.FC<RaceManagerTabProps> = ({
     setSaveSuccessMsg(null);
     setSavedRaceForExport(null);
     setScriptTestResult(null);
+    setPhotosScriptTestResult(null);
     setIsModalOpen(true);
   };
 
@@ -301,6 +317,39 @@ export const RaceManagerTab: React.FC<RaceManagerTabProps> = ({
     }
   };
 
+  // Kiểm tra kết nối thử nghiệm đến Script Ảnh Thi Đấu (Cột BIB & IMG)
+  const handleTestPhotosScript = async () => {
+    if (!formPhotosScriptUrl.trim()) {
+      setPhotosScriptTestResult({
+        success: false,
+        message: 'Vui lòng nhập đường link Google Apps Script ảnh thi đấu trước khi kiểm tra.',
+      });
+      return;
+    }
+    setIsTestingPhotosScript(true);
+    setPhotosScriptTestResult(null);
+    try {
+      const resp = await fetch(`/api/race-photos?url=${encodeURIComponent(formPhotosScriptUrl.trim())}`);
+      const data = await resp.json();
+      if (!resp.ok) {
+        throw new Error(data.error || `HTTP ${resp.status}`);
+      }
+      const total = data.total || (Array.isArray(data.data) ? data.data.length : (data.photos ? data.photos.length : 0));
+      setPhotosScriptTestResult({
+        success: true,
+        count: total,
+        message: `✅ Kết nối thành công! Đã tìm thấy ${total} bản ghi ảnh từ Google Sheet.`,
+      });
+    } catch (err: any) {
+      setPhotosScriptTestResult({
+        success: false,
+        message: `Lỗi kết nối script ảnh: ${err.message || 'Không thể lấy dữ liệu'}`,
+      });
+    } finally {
+      setIsTestingPhotosScript(false);
+    }
+  };
+
   // Save race
   const handleSubmitRace = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -327,6 +376,7 @@ export const RaceManagerTab: React.FC<RaceManagerTabProps> = ({
         shortName: formName.trim(),
         defaultBgUrl: formBgUrl,
         appsScriptUrl: formScriptUrl.trim(),
+        photosScriptUrl: formPhotosScriptUrl.trim(),
         date: formDate.trim() || '2026',
         locationFull: formLocation.trim() || 'Việt Nam',
         placements: editingRace?.placements || currentPlacements,
@@ -946,6 +996,67 @@ export const RaceManagerTab: React.FC<RaceManagerTabProps> = ({
                 )}
               </div>
 
+              {/* 5/ Script Ảnh Thi Đấu (Cột BIB & IMG từ Google Sheet) */}
+              <div>
+                <div className="flex items-center justify-between mb-1">
+                  <label className="block text-xs font-bold text-stone-200">
+                    5/ Script Ảnh Thi Đấu (Google Sheet: Cột BIB & Cột IMG)
+                  </label>
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setShowScriptModal(true)}
+                      className="text-xs text-amber-400 hover:text-amber-300 font-semibold flex items-center gap-1 cursor-pointer"
+                    >
+                      <Code2 className="w-3.5 h-3.5" />
+                      <span>Xem & Copy mã Script</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleTestPhotosScript}
+                      disabled={isTestingPhotosScript || !formPhotosScriptUrl.trim()}
+                      className="text-xs text-sky-400 hover:text-sky-300 font-semibold flex items-center gap-1 cursor-pointer disabled:opacity-50"
+                    >
+                      {isTestingPhotosScript ? (
+                        <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                      ) : (
+                        <CheckCircle2 className="w-3.5 h-3.5" />
+                      )}
+                      <span>Kiểm tra ảnh</span>
+                    </button>
+                  </div>
+                </div>
+                <input
+                  type="text"
+                  value={formPhotosScriptUrl}
+                  onChange={(e) => setFormPhotosScriptUrl(e.target.value)}
+                  placeholder="https://script.google.com/macros/s/.../exec"
+                  className="w-full px-3.5 py-2.5 bg-stone-800 border border-stone-700 rounded-xl text-xs text-white placeholder-stone-500 font-mono focus:outline-none focus:border-teal-500"
+                />
+                <p className="text-[10px] text-stone-400 mt-1">
+                  Đường link Web App Google Apps Script lấy ảnh theo 2 cột: <strong>BIB</strong> và <strong>IMG</strong> (Link Google Drive hoặc URL ảnh trực tiếp).
+                </p>
+
+                {photosScriptTestResult && (
+                  <div
+                    className={`mt-2 p-2.5 rounded-xl border text-xs flex items-start gap-2 ${
+                      photosScriptTestResult.success
+                        ? 'bg-emerald-950/50 border-emerald-700 text-emerald-300'
+                        : 'bg-amber-950/50 border-amber-700 text-amber-300'
+                    }`}
+                  >
+                    {photosScriptTestResult.success ? (
+                      <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
+                    ) : (
+                      <AlertCircle className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
+                    )}
+                    <div>
+                      <p className="font-semibold">{photosScriptTestResult.message}</p>
+                    </div>
+                  </div>
+                )}
+              </div>
+
               {/* Thông tin bổ sung */}
               <div className="grid grid-cols-2 gap-3 pt-1">
                 <div>
@@ -993,6 +1104,87 @@ export const RaceManagerTab: React.FC<RaceManagerTabProps> = ({
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL: MÃ GOOGLE APPS SCRIPT CHO GOOGLE SHEET ẢNH (2 CỘT: BIB & IMG) */}
+      {showScriptModal && (
+        <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
+          <div className="bg-stone-900 border border-stone-700 rounded-3xl max-w-2xl w-full p-6 sm:p-7 shadow-2xl text-stone-100 my-8 space-y-4">
+            <div className="flex items-center justify-between border-b border-stone-800 pb-3.5">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-amber-500/20 border border-amber-500/40 flex items-center justify-center text-amber-400">
+                  <Code2 className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="text-base font-bold text-white">
+                    Mã Google Apps Script: Lấy ảnh thi đấu theo BIB
+                  </h3>
+                  <p className="text-stone-400 text-xs">
+                    Gắn vào Google Sheet 2 cột (Cột A: BIB, Cột B: IMG link ảnh)
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowScriptModal(false)}
+                className="p-2 text-stone-400 hover:text-white hover:bg-stone-800 rounded-xl transition-colors cursor-pointer"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Quick 3-Step Guide */}
+            <div className="p-3.5 bg-stone-950/70 border border-stone-800 rounded-2xl text-xs space-y-1.5 text-stone-300">
+              <div className="font-bold text-amber-400 flex items-center gap-1.5">
+                <Sparkles className="w-3.5 h-3.5" />
+                <span>3 Bước triển khai cực nhanh:</span>
+              </div>
+              <ol className="list-decimal list-inside space-y-1 text-stone-300 text-[11px] leading-relaxed">
+                <li>
+                  Tạo Google Sheet có 2 cột: Cột 1 là <strong>BIB</strong>, Cột 2 là <strong>IMG</strong> (Link ảnh Drive hoặc web).
+                </li>
+                <li>
+                  Vào menu <strong>Tiện ích mở rộng (Extensions)</strong> &gt; <strong>Apps Script</strong>, xoá hết code cũ rồi dán toàn bộ đoạn mã bên dưới vào.
+                </li>
+                <li>
+                  Bấm <strong>Triển khai (Deploy)</strong> &gt; <strong>Bản triển khai mới (New deployment)</strong> &gt; Chọn <strong>Ứng dụng web (Web App)</strong> &gt; Tại mục <i>Ai có quyền truy cập</i> chọn <strong>Bất kỳ ai (Anyone)</strong> &gt; Triển khai và copy đường link dán vào ô trên!
+                </li>
+              </ol>
+            </div>
+
+            {/* Code Box with Copy Button */}
+            <div className="relative">
+              <div className="flex items-center justify-between px-3 py-1.5 bg-stone-800 rounded-t-xl border border-stone-700 border-b-0 text-[11px] text-stone-400 font-mono">
+                <span>Code.gs (Google Apps Script)</span>
+                <button
+                  type="button"
+                  onClick={() => {
+                    navigator.clipboard.writeText(GOOGLE_APPS_SCRIPT_PHOTOS_CODE);
+                    setCopiedScript(true);
+                    setTimeout(() => setCopiedScript(false), 3000);
+                  }}
+                  className="px-3 py-1 bg-amber-500 hover:bg-amber-400 text-stone-950 font-bold rounded-lg text-xs flex items-center gap-1.5 transition-all shadow-xs cursor-pointer"
+                >
+                  {copiedScript ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
+                  <span>{copiedScript ? 'Đã sao chép!' : 'Sao chép toàn bộ code'}</span>
+                </button>
+              </div>
+              <pre className="p-4 bg-stone-950 border border-stone-700 rounded-b-xl overflow-x-auto text-[11px] font-mono text-emerald-400 max-h-72 scrollbar-thin">
+                {GOOGLE_APPS_SCRIPT_PHOTOS_CODE}
+              </pre>
+            </div>
+
+            <div className="flex items-center justify-end pt-2 border-t border-stone-800">
+              <button
+                type="button"
+                onClick={() => setShowScriptModal(false)}
+                className="px-5 py-2 bg-stone-800 hover:bg-stone-700 text-white font-semibold rounded-xl text-xs cursor-pointer"
+              >
+                Đã hiểu & Đóng
+              </button>
+            </div>
           </div>
         </div>
       )}

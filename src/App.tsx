@@ -490,6 +490,7 @@ export default function App() {
             raceName={activeRace.name}
             defaultBgUrl={activeRace.defaultBgUrl}
             raceId={activeRace.id}
+            activeRace={activeRace}
           />
         </section>
 

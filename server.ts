@@ -228,6 +228,7 @@ async function startServer() {
       themeDotBg: raw.themeDotBg || 'bg-sky-600',
       storageKeyPrefix: raw.storageKeyPrefix || `vm_${cleanSlug.replace(/[^a-z0-9]/g, '')}`,
       appsScriptUrl: (raw.appsScriptUrl || '').trim(),
+      photosScriptUrl: (raw.photosScriptUrl || '').trim(),
       description: raw.description || `Tra cứu kết quả & Chứng nhận điện tử ${raw.name || cleanSlug}`,
       placements: raw.placements || undefined,
       createdAt: raw.createdAt || raw.exportedAt || new Date().toISOString(),
@@ -480,6 +481,7 @@ async function startServer() {
         themeDotBg: race.themeDotBg || 'bg-sky-600',
         storageKeyPrefix: `vm_${cleanSlug.replace(/[^a-z0-9]/g, '')}`,
         appsScriptUrl: (race.appsScriptUrl || '').trim(),
+        photosScriptUrl: (race.photosScriptUrl || '').trim(),
         description: race.description || `Tra cứu kết quả & Chứng nhận điện tử ${race.name}`,
         placements: race.placements || undefined,
         createdAt: new Date().toISOString(),
@@ -793,6 +795,114 @@ async function startServer() {
       return res.send(text);
     } catch (err: any) {
       return res.status(500).json({ error: err.message });
+    }
+  });
+
+  // Dedicated Proxy & Ingestion for Runner Photos (BIB + IMG mapping)
+  const racePhotosCache = new Map<string, { data: any; timestamp: number }>();
+  const PHOTOS_CACHE_TTL = 3 * 60 * 1000; // 3 minutes
+
+  app.get('/api/race-photos', async (req, res) => {
+    const targetUrl = req.query.url as string;
+    const bib = req.query.bib ? String(req.query.bib).toLowerCase().trim() : '';
+
+    if (!targetUrl) {
+      return res.status(400).json({ error: 'Missing url parameter (Google Apps Script URL cho ảnh)' });
+    }
+
+    try {
+      const cacheKey = `${targetUrl}__${bib}`;
+      const cached = racePhotosCache.get(cacheKey);
+      if (cached && Date.now() - cached.timestamp < PHOTOS_CACHE_TTL) {
+        return res.json({ ...cached.data, cached: true });
+      }
+
+      const fetchUrl = new URL(targetUrl);
+      if (bib) {
+        fetchUrl.searchParams.set('bib', bib);
+      }
+
+      const response = await fetch(fetchUrl.toString(), {
+        redirect: 'follow',
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko)',
+          'Accept': 'application/json, text/plain, */*',
+        },
+      });
+
+      if (!response.ok) {
+        return res.status(response.status).json({
+          error: `Google Apps Script ảnh trả về mã lỗi HTTP ${response.status}`,
+        });
+      }
+
+      const rawText = await response.text();
+      let parsed: any = null;
+      try {
+        parsed = JSON.parse(rawText);
+      } catch {
+        // Fallback TSV parser if user returned tab-separated text
+        const lines = rawText.trim().split(/\r?\n/);
+        const list: { bib: string; img: string }[] = [];
+        for (let i = 1; i < lines.length; i++) {
+          const parts = lines[i].split('\t');
+          if (parts.length >= 2) {
+            list.push({ bib: parts[0].trim(), img: parts[1].trim() });
+          }
+        }
+        parsed = { success: true, total: list.length, data: list };
+      }
+
+      // Convert Google Drive links to direct stream links and flatten comma/newline separated URLs
+      const splitAndNormalize = (urls: (string | any)[]): string[] => {
+        const out: string[] = [];
+        for (const item of urls) {
+          if (!item) continue;
+          const raw = typeof item === 'string' ? item : (item.img || item.url || '');
+          if (!raw) continue;
+          const pieces = raw.split(/[\n,;]+/);
+          for (const p of pieces) {
+            const trimmed = p.trim();
+            if (!trimmed) continue;
+            const match = trimmed.match(/\/file\/d\/([a-zA-Z0-9_-]+)/) || trimmed.match(/[?&]id=([a-zA-Z0-9_-]+)/);
+            if (match && match[1]) {
+              out.push(`https://lh3.googleusercontent.com/d/${match[1]}`);
+            } else if (trimmed.startsWith('http://') || trimmed.startsWith('https://')) {
+              out.push(trimmed);
+            }
+          }
+        }
+        return out;
+      };
+
+      if (parsed) {
+        if (Array.isArray(parsed.photos)) {
+          parsed.photos = splitAndNormalize(parsed.photos);
+        }
+        if (Array.isArray(parsed.data)) {
+          const expandedData: { bib: string; img: string }[] = [];
+          for (const item of parsed.data) {
+            const itemUrls = splitAndNormalize([item.img || item.url || '']);
+            for (const u of itemUrls) {
+              expandedData.push({ bib: item.bib, img: u });
+            }
+          }
+          parsed.data = expandedData;
+        }
+        if (parsed.photosByBib && typeof parsed.photosByBib === 'object') {
+          for (const k of Object.keys(parsed.photosByBib)) {
+            if (Array.isArray(parsed.photosByBib[k])) {
+              parsed.photosByBib[k] = splitAndNormalize(parsed.photosByBib[k]);
+            }
+          }
+        }
+      }
+
+      racePhotosCache.set(cacheKey, { data: parsed, timestamp: Date.now() });
+      return res.json(parsed);
+    } catch (err: any) {
+      console.warn('[Proxy /api/race-photos] Error:', err);
+      return res.status(500).json({ error: err.message || 'Lỗi khi tải danh sách ảnh thi đấu' });
     }
   });
 
